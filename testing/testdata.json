@@ -1,0 +1,540 @@
+var testdata = `{
+    "plus_code": {
+        "compound_code": "7RXM+C75 Singapore",
+        "global_code": "6PH57RXM+C75"
+    },
+    "results": [
+        {
+            "address_components": [
+                {
+                    "long_name": "Horizon Towers",
+                    "short_name": "Horizon Towers",
+                    "types": [
+                        "premise"
+                    ]
+                },
+                {
+                    "long_name": "15",
+                    "short_name": "15",
+                    "types": [
+                        "street_number"
+                    ]
+                },
+                {
+                    "long_name": "Leonie Hill Road",
+                    "short_name": "Leonie Hill Rd",
+                    "types": [
+                        "route"
+                    ]
+                },
+                {
+                    "long_name": "River Valley",
+                    "short_name": "River Valley",
+                    "types": [
+                        "neighborhood",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "239194",
+                    "short_name": "239194",
+                    "types": [
+                        "postal_code"
+                    ]
+                }
+            ],
+            "formatted_address": "15 Leonie Hill Rd, Horizon Towers, Singapore 239194",
+            "geometry": {
+                "location": {
+                    "lat": 1.2984055,
+                    "lng": 103.833362
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.299754480291502,
+                        "lng": 103.8347109802915
+                    },
+                    "southwest": {
+                        "lat": 1.297056519708498,
+                        "lng": 103.8320130197085
+                    }
+                }
+            },
+            "place_id": "ChIJVXdnqpoZ2jERX164sCVpKKI",
+            "plus_code": {
+                "compound_code": "7RXM+98 Singapore",
+                "global_code": "6PH57RXM+98"
+            },
+            "types": [
+                "establishment",
+                "point_of_interest"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Horizon Towers",
+                    "short_name": "Horizon Towers",
+                    "types": [
+                        "premise"
+                    ]
+                },
+                {
+                    "long_name": "15",
+                    "short_name": "15",
+                    "types": [
+                        "street_number"
+                    ]
+                },
+                {
+                    "long_name": "Leonie Hill Road",
+                    "short_name": "Leonie Hill Rd",
+                    "types": [
+                        "route"
+                    ]
+                },
+                {
+                    "long_name": "River Valley",
+                    "short_name": "River Valley",
+                    "types": [
+                        "neighborhood",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "239194",
+                    "short_name": "239194",
+                    "types": [
+                        "postal_code"
+                    ]
+                }
+            ],
+            "formatted_address": "15 Leonie Hill Rd, Horizon Towers, Singapore 239194",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 1.2987515,
+                        "lng": 103.8336241
+                    },
+                    "southwest": {
+                        "lat": 1.2980443,
+                        "lng": 103.8330996
+                    }
+                },
+                "location": {
+                    "lat": 1.2983254,
+                    "lng": 103.8333551
+                },
+                "location_type": "ROOFTOP",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.299746880291502,
+                        "lng": 103.8347108302915
+                    },
+                    "southwest": {
+                        "lat": 1.297048919708498,
+                        "lng": 103.8320128697085
+                    }
+                }
+            },
+            "place_id": "ChIJVXdnqpoZ2jEREJwNgNQYlQE",
+            "types": [
+                "premise"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "7RXM+C7",
+                    "short_name": "7RXM+C7",
+                    "types": [
+                        "plus_code"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                }
+            ],
+            "formatted_address": "7RXM+C7 Singapore",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 1.298625,
+                        "lng": 103.83325
+                    },
+                    "southwest": {
+                        "lat": 1.2985,
+                        "lng": 103.833125
+                    }
+                },
+                "location": {
+                    "lat": 1.2985181,
+                    "lng": 103.8332306
+                },
+                "location_type": "GEOMETRIC_CENTER",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.299911480291502,
+                        "lng": 103.8345364802915
+                    },
+                    "southwest": {
+                        "lat": 1.297213519708498,
+                        "lng": 103.8318385197085
+                    }
+                }
+            },
+            "place_id": "GhIJlDlM6rrG9D8RsUFwplP1WUA",
+            "plus_code": {
+                "compound_code": "7RXM+C7 Singapore",
+                "global_code": "6PH57RXM+C7"
+            },
+            "types": [
+                "plus_code"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "25",
+                    "short_name": "25",
+                    "types": [
+                        "street_number"
+                    ]
+                },
+                {
+                    "long_name": "Leonie Hill Road",
+                    "short_name": "Leonie Hill Rd",
+                    "types": [
+                        "route"
+                    ]
+                },
+                {
+                    "long_name": "River Valley",
+                    "short_name": "River Valley",
+                    "types": [
+                        "neighborhood",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                }
+            ],
+            "formatted_address": "25 Leonie Hill Rd, Singapore",
+            "geometry": {
+                "location": {
+                    "lat": 1.298786,
+                    "lng": 103.8338915
+                },
+                "location_type": "RANGE_INTERPOLATED",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.300134980291502,
+                        "lng": 103.8352404802915
+                    },
+                    "southwest": {
+                        "lat": 1.297437019708498,
+                        "lng": 103.8325425197085
+                    }
+                }
+            },
+            "place_id": "EhwyNSBMZW9uaWUgSGlsbCBSZCwgU2luZ2Fwb3JlIhoSGAoUChIJXdYWBpAZ2jERb4_Exib-FysQGQ",
+            "types": [
+                "street_address"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "15",
+                    "short_name": "15",
+                    "types": [
+                        "street_number"
+                    ]
+                },
+                {
+                    "long_name": "Leonie Hill Road",
+                    "short_name": "Leonie Hill Rd",
+                    "types": [
+                        "route"
+                    ]
+                },
+                {
+                    "long_name": "River Valley",
+                    "short_name": "River Valley",
+                    "types": [
+                        "neighborhood",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                }
+            ],
+            "formatted_address": "15 Leonie Hill Rd, Singapore",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 1.2984653,
+                        "lng": 103.8338593
+                    },
+                    "southwest": {
+                        "lat": 1.2982807,
+                        "lng": 103.8338096
+                    }
+                },
+                "location": {
+                    "lat": 1.2983737,
+                    "lng": 103.8338321
+                },
+                "location_type": "GEOMETRIC_CENTER",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.299721980291502,
+                        "lng": 103.8351834302915
+                    },
+                    "southwest": {
+                        "lat": 1.297024019708498,
+                        "lng": 103.8324854697085
+                    }
+                }
+            },
+            "place_id": "ChIJAzTvrpoZ2jERPmmhnmgHClw",
+            "types": [
+                "route"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "River Valley",
+                    "short_name": "River Valley",
+                    "types": [
+                        "neighborhood",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                }
+            ],
+            "formatted_address": "River Valley, Singapore",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 1.3046959,
+                        "lng": 103.8433229
+                    },
+                    "southwest": {
+                        "lat": 1.2910339,
+                        "lng": 103.8232101
+                    }
+                },
+                "location": {
+                    "lat": 1.2959376,
+                    "lng": 103.8360614
+                },
+                "location_type": "APPROXIMATE",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.3046959,
+                        "lng": 103.8433229
+                    },
+                    "southwest": {
+                        "lat": 1.2910339,
+                        "lng": 103.8232101
+                    }
+                }
+            },
+            "place_id": "ChIJzcK7spoZ2jERkKbarqz3AAU",
+            "types": [
+                "neighborhood",
+                "political"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Singapore",
+                    "short_name": "Singapore",
+                    "types": [
+                        "locality",
+                        "political"
+                    ]
+                },
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                }
+            ],
+            "formatted_address": "Singapore",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 1.4708809,
+                        "lng": 104.0415799
+                    },
+                    "southwest": {
+                        "lat": 1.216611,
+                        "lng": 103.6065099
+                    }
+                },
+                "location": {
+                    "lat": 1.3553794,
+                    "lng": 103.8677444
+                },
+                "location_type": "APPROXIMATE",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.4708809,
+                        "lng": 104.0415799
+                    },
+                    "southwest": {
+                        "lat": 1.216611,
+                        "lng": 103.6065099
+                    }
+                }
+            },
+            "place_id": "ChIJyY4rtGcX2jERIKTarqz3AAQ",
+            "types": [
+                "locality",
+                "political"
+            ]
+        },
+        {
+            "address_components": [
+                {
+                    "long_name": "Singapore",
+                    "short_name": "SG",
+                    "types": [
+                        "country",
+                        "political"
+                    ]
+                }
+            ],
+            "formatted_address": "Singapore",
+            "geometry": {
+                "bounds": {
+                    "northeast": {
+                        "lat": 1.4784001,
+                        "lng": 104.0945001
+                    },
+                    "southwest": {
+                        "lat": 1.1496,
+                        "lng": 103.594
+                    }
+                },
+                "location": {
+                    "lat": 1.352083,
+                    "lng": 103.819836
+                },
+                "location_type": "APPROXIMATE",
+                "viewport": {
+                    "northeast": {
+                        "lat": 1.4784001,
+                        "lng": 104.0945001
+                    },
+                    "southwest": {
+                        "lat": 1.1496,
+                        "lng": 103.594
+                    }
+                }
+            },
+            "place_id": "ChIJdZOLiiMR2jERxPWrUs9peIg",
+            "types": [
+                "country",
+                "political"
+            ]
+        }
+    ],
+    "status": "OK"
+}`;
