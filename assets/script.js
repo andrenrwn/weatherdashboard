@@ -5,8 +5,9 @@
 var latitude = 9.643097;
 var longitude = 95.642956; // default location under the global scope
 
-var apilink_openstreetmap = "";
-var apilink_googleapis = "";
+// var apikey_openstreetmap = "";
+// var apikey_openweather = "";
+// var apikey_google = "";
 
 var myapikey = ""; // Don't store the API key in the src code
 
@@ -76,7 +77,7 @@ function getapikey() {
   } else {
     console.log(!myapikey, myapikey);
     while (!myapikey) {
-      myapikey = prompt("Please enter a Google API key", "");
+      myapikey = prompt("Please enter an API key", "");
       let text = "You entered " + myapikey + "\nStore this key in localstore?";
       console.log(text);
       if (confirm(text)) {
@@ -219,7 +220,7 @@ function setplacename(position) {
   // Example openweathermap reverse geocoding api call:
   // http://api.openweathermap.org/geo/1.0/reverse?lat=1.2985181&lon=103.8332306&limit=&appid=
 
-  // Get the city name of the user's position
+  // Get the city name of the user's position with google API
   var apilink =
     "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&key=" + myapikey;
 
@@ -249,7 +250,7 @@ function setplacename(position) {
         });
     */
 
-  /********** Use debug testdata (so we don't have to call the API while developing) */
+  /********** Use debug googleapi response testdata (so we don't have to call the API while developing) 
   let data = JSON.parse(testdata);
   console.log(data);
   console.log(data.plus_code);
@@ -262,6 +263,22 @@ function setplacename(position) {
   } else {
     console.log("We're in the middle of nowhere");
   }
+  ************ googleapi respnose testdata */
+
+  /*********** openweather reverse geocoding */
+  let data = JSON.parse(testowcity);
+  console.log(data);
+  localename = data[0].name;
+  if (data[0].name) {
+    localename = data[0].name;
+    console.log("We are in " + localename);
+
+    // set the city search input text
+    document.getElementById("citychoice").value = localename;
+  } else {
+    console.log("We're in the middle of nowhere");
+  }
+  /**** /openweather reverse geocoding */
 
   return localename;
 }
@@ -310,6 +327,13 @@ document.querySelector("#find-me").addEventListener("click", geoFindMe);
 document.querySelector("#getweather").addEventListener("click", function () {
   let city = document.getElementById("citychoice").value.trim();
   if (city) {
+    if (config.dataobj.searchistory.find(function (elem) { if (elem.toLowerCase() === city.toLowerCase()) {return elem;}})) {
+      console.log(city, " is found in the history list");
+    } else {
+      config.dataobj.searchistory.push(city);
+      console.log("Added city ", city, " to ", config.dataobj.searchistory);
+      config.store_data();
+    }
     getforecast(city);
     rendercityimage(city.toLowerCase());
   } else {
