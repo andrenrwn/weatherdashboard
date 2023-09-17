@@ -77,7 +77,8 @@ function getapikey() {
   } else {
     console.log(!myapikey, myapikey);
     while (!myapikey) {
-      myapikey = prompt("Please enter an API key", "");
+      myapikey = prompt("Please enter an API key");
+      alert("You entered " + myapikey);
       let text = "You entered " + myapikey + "\nStore this key in localstore?";
       console.log(text);
       if (confirm(text)) {
@@ -211,8 +212,8 @@ function getforecast(city) {
   */
 }
 
-// Render the map and autocomplete text after we get the city locale name of the user's current location
-function setplacename(position) {
+// Get the place name (city name) based on the given position, then populate the search text input area with it
+function getplacename(position) {
   let localename = "";
   var latitude = position.coords.latitude;
   var longitude = position.coords.longitude;
@@ -220,37 +221,55 @@ function setplacename(position) {
   // Example openweathermap reverse geocoding api call:
   // http://api.openweathermap.org/geo/1.0/reverse?lat=1.2985181&lon=103.8332306&limit=&appid=
 
-  // Get the city name of the user's position with google API
+  // Get the city name of the user's position with openweathermap API
   var apilink =
-    "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&key=" + myapikey;
+    "http://api.openweathermap.org/geo/1.0/reverse?lat=" + latitude + "&lon=" + longitude + "&limit=&appid=" + myapikey;
 
-  /*  Uncomment to allow API calls out
-    function errorCallback(error) {
-        console.log('Error:', error.message);
-    }
+  // Get the city name of the user's position with google API
+  // var apilink = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&key=" + myapikey;
 
-    fetch(apilink2)
-        .then(function (response) {
-            if (response.ok) {
-                // console.log(response);
-                response.json().then(function (data) {
-                    //console.log(data);
-                    if (data.plus_code.compound_code) {
-                        console.log("We are in " + data.plus_code.compound_code.split(" ")[1]);
-                    } else {
-                        console.log("We're in the middle of nowhere");
-                    }
-                });
-            } else {
-                alert('Error: ' + response.statusText);
-            }
-        })
-        .catch(function (error) {
-            console.log('Error:', error);
+  function errorCallback(error) {
+    console.log("Error:", error.message);
+  }
+
+  fetch(apilink)
+    .then(function (response) {
+      if (response.ok) {
+        console.log(response);
+        response.json().then(function (data) {
+          console.log(data);
+
+          // /*  Uncomment to allow API calls out via googleapi ******
+          // if (data.plus_code.compound_code) {
+          //   console.log("We are in " + data.plus_code.compound_code.split(" ")[1]);
+          // } else {
+          //   console.log("We're in the middle of nowhere");
+          // }
+          // */
+          // /* Parse the openweathermap API response
+          localename = data[0].name;
+          if (data[0].name) {
+            localename = data[0].name;
+            console.log("We are in " + localename);
+
+            // set the city search input text
+            document.getElementById("citychoice").value = localename; // Show the city in the input text area
+          } else {
+            console.log("We're in the middle of nowhere");
+          }
+          return localename;
+          // end parse openweathermap API response */
         });
-    */
+      } else {
+        alert("Error: " + response.statusText);
+      }
+    })
+    .catch(function (error) {
+      console.log("Error:", error);
+    });
 
-  /********** Use debug googleapi response testdata (so we don't have to call the API while developing) 
+  /********** Use debug googleapi response testdata 
+  /* (so we don't have to call the API while developing) 
   let data = JSON.parse(testdata);
   console.log(data);
   console.log(data.plus_code);
@@ -265,7 +284,7 @@ function setplacename(position) {
   }
   ************ googleapi respnose testdata */
 
-  /*********** openweather reverse geocoding */
+  /*********** openweather reverse geocoding response testdata *
   let data = JSON.parse(testowcity);
   console.log(data);
   localename = data[0].name;
@@ -278,9 +297,9 @@ function setplacename(position) {
   } else {
     console.log("We're in the middle of nowhere");
   }
-  /**** /openweather reverse geocoding */
+  **** /openweather reverse geocoding */
 
-  return localename;
+  return false;
 }
 
 // Try retrieving the current position of the user
@@ -301,7 +320,7 @@ function geoFindMe() {
     mapLink.href = `https://www.openstreetmap.org/#map=11/${latitude}/${longitude}`;
     mapLink.textContent = `Latitude: ${latitude} °, Longitude: ${longitude} °`;
 
-    setplacename(position);
+    getplacename(position);
   }
 
   function error() {
@@ -316,28 +335,64 @@ function geoFindMe() {
   }
 }
 
+// Render the list of the city search history
+function displaysearchhistory() {
+  // Clear the serach history
+  document.getElementById("searchhistory").replaceChildren();
+
+  let newitem = document.createElement("li");
+  newitem.classList.add("menu-title");
+  newitem.textContent = "Search History";
+
+  document.getElementById("searchhistory").appendChild(newitem);
+
+  for (var i = config.dataobj.searchistory.length - 1; i >= 0; i--) {
+    newitem = document.createElement("li");
+    newitem.innerHTML = '<a class="placename">' + config.dataobj.searchistory[i] + '</a>';
+    document.getElementById("searchhistory").appendChild(newitem);
+  }
+}
+
 // Start main body of code
 
 getapikey();
 
 config.load_data();
 
+displaysearchhistory();
+
 document.querySelector("#find-me").addEventListener("click", geoFindMe);
 
 document.querySelector("#getweather").addEventListener("click", function () {
-  let city = document.getElementById("citychoice").value.trim();
+  let city = document.getElementById("citychoice").value.trim(); // sanitize input
+
   if (city) {
-    if (config.dataobj.searchistory.find(function (elem) { if (elem.toLowerCase() === city.toLowerCase()) {return elem;}})) {
+    // check if the city is already in the search history
+    if (
+      config.dataobj.searchistory.find(function (elem) {
+        if (elem.toLowerCase() === city.toLowerCase()) {
+          return elem;
+        }
+      })
+    ) {
       console.log(city, " is found in the history list");
     } else {
-      config.dataobj.searchistory.push(city);
+      config.dataobj.searchistory.push(city); // if not, add the city to the search history
       console.log("Added city ", city, " to ", config.dataobj.searchistory);
+      displaysearchhistory();
       config.store_data();
     }
     getforecast(city);
     rendercityimage(city.toLowerCase());
   } else {
     document.getElementById("citychoice").value = "Please choose a city";
+  }
+});
+
+document.getElementById("searchhistory").addEventListener("click", function (event) {
+  event.preventDefault();
+  if (event.target.classList.contains("placename")) {
+    document.getElementById("citychoice").value = event.target.textContent;
   }
 });
 
