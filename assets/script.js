@@ -10,8 +10,6 @@ var apilink_googleapis = "";
 
 var myapikey = ""; // Don't store the API key in the src code
 
-var units = "metric"; // Units are in standard(K), metric(C), or imperial(F) https://openweathermap.org/api/one-call-api#data
-
 // Define today's forecast cards in html
 function createElementFromHTML(htmlString) {
   var div = document.createElement("div");
@@ -40,6 +38,33 @@ var daycard = createElementFromHTML(
     </div>
 `
 );
+
+// Create an object to get/store search history and preferences
+class weatherdashdata {
+  constructor() {
+    this.dataobj = {};
+    this.dataobj.searchistory = []; // ["Singapore", "Seattle", "Tokyo", "Amsterdam", "Sydney"];
+    this.dataobj.units = "metric";
+    this.storagekey = "weatherdashdata";
+    this.load_data();
+  }
+  load_data() {
+    let newdata = {};
+    //console.log("loading from storage");
+    newdata = JSON.parse(localStorage.getItem(this.storagekey));
+    Object.assign(this.dataobj, newdata); // merge data from storage
+    return true;
+  }
+  // Store data to localstorage
+  store_data() {
+    //console.log("saving to storage");
+    //console.log(this.pdata);
+    localStorage.setItem(this.storagekey, JSON.stringify(this.dataobj));
+    return true;
+  }
+}
+
+var config = new weatherdashdata(); // store the history and metric settings in the object "config".
 
 // Store an API key in local storage
 function getapikey() {
@@ -191,6 +216,9 @@ function setplacename(position) {
   var latitude = position.coords.latitude;
   var longitude = position.coords.longitude;
 
+  // Example openweathermap reverse geocoding api call:
+  // http://api.openweathermap.org/geo/1.0/reverse?lat=1.2985181&lon=103.8332306&limit=&appid=
+
   // Get the city name of the user's position
   var apilink =
     "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&key=" + myapikey;
@@ -271,7 +299,11 @@ function geoFindMe() {
   }
 }
 
+// Start main body of code
+
 getapikey();
+
+config.load_data();
 
 document.querySelector("#find-me").addEventListener("click", geoFindMe);
 
