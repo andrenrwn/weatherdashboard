@@ -1,4 +1,12 @@
 // Global variables
+
+// Note: API keys are stored in private.js
+// var myapikeys = {
+//   unsplash: "";
+//   openweater: "";
+//   google: "";
+// };
+
 //var latitude = 1.2985181;
 //var longitude = 103.8332306; // default location under the global scope
 
@@ -93,7 +101,56 @@ function getapikey() {
   }
 }
 
+function call_api(apilink) {
+
+  function errorCallback(error) {
+    console.log("Error:", error.message);
+  }
+
+  fetch(apilink)
+    .then(function (response) {
+      if (response.ok) {
+        // console.log(response);
+        response.json().then(function (data) {
+          console.log(data);
+
+          // Teleport
+          //console.log("image is at: " + data.photos[0].image.web);
+          //document.getElementById("todaysdash").style.backgroundImage = 'url("' + data.photos[0].image.web + '")';
+
+          // unsplash
+          console.log("image is at: " + data[0].urls.full + "&w=" + window.innerWidth);
+          document.getElementById("mainscreen").style.backgroundImage = 'url("' + data[0].urls.full + '&w=' + window.innerWidth + '")';
+        });
+      } else {
+        alert("Error: " + response.statusText);
+      }
+    })
+    .catch(function (error) {
+      console.log("Error:", error);
+    });
+}
+
+// Display a picture of the place that we are tracking the weather for
 function rendercityimage(city) {
+  // Use unsplash source image to find images of places (not an official API, probably backdoor, but requires no API key)
+  //let apilink = "https://source.unsplash.com/1600x900/?" + encodeURIComponent(city);
+  //document.getElementById("mainscreen").style.backgroundImage = 'url("' + apilink + '")';
+  // /unsplash source image
+
+  // Use the unsplash official API which offers random pictures. This requires an API key.
+  // Example:
+  // https://api.unsplash.com/photos/random?query=Seattle&orientation=landscape&count=10&client_id={apikey}
+  // https://images.unsplash.com/photo-1547640084-1dfcc7ef3b22?crop=entropy&cs=srgb&fm=jpg&ixlib=rb-4.0.3&q=85&ixid={apikey}
+  let apilink =
+    "https://api.unsplash.com/photos/random?query=" +
+    city +
+    "&orientation=landscape&count=1&per_page=1&client_id=" +
+    myapikeys.unsplash;
+
+  call_api(apilink);
+
+  /*********Uncomment for Teleport API
   // Teleport API city images
   let apilink = "https://api.teleport.org/api/urban_areas/slug:" + city + "/images/";
 
@@ -121,6 +178,7 @@ function rendercityimage(city) {
     .catch(function (error) {
       console.log("Error:", error);
     });
+  */
 }
 
 // Get weather data
@@ -137,7 +195,7 @@ function getforecast(city) {
 
   // Display the city's name and date on the main dashboard
   document.getElementById("selectedcity").textContent = city;
-  document.getElementById("todaysdate").textContent = thisdate.format("dddd D MMMM YYYY");
+  document.getElementById("todaysdate").textContent = thisdate.format("dddd, D MMMM YYYY");
 
   // Clear first day card
   document.getElementById("todaysweather").replaceChildren();
@@ -348,18 +406,20 @@ function displaysearchhistory() {
 
   for (var i = config.dataobj.searchistory.length - 1; i >= 0; i--) {
     newitem = document.createElement("li");
-    newitem.innerHTML = '<a class="placename">' + config.dataobj.searchistory[i] + '</a>';
+    newitem.innerHTML = '<a class="placename">' + config.dataobj.searchistory[i] + "</a>";
     document.getElementById("searchhistory").appendChild(newitem);
   }
 }
 
-// Start main body of code
+// Start main() body of code
 
 getapikey();
 
 config.load_data();
 
 displaysearchhistory();
+
+call_api("https://api.unsplash.com/photos/random?query=clouds&orientation=landscape&count=1&per_page=1&client_id=" + myapikeys.unsplash);
 
 document.querySelector("#find-me").addEventListener("click", geoFindMe);
 
@@ -368,14 +428,15 @@ document.querySelector("#getweather").addEventListener("click", function () {
 
   if (city) {
     // check if the city is already in the search history
-    if (
-      config.dataobj.searchistory.find(function (elem) {
-        if (elem.toLowerCase() === city.toLowerCase()) {
-          return elem;
-        }
-      })
-    ) {
-      console.log(city, " is found in the history list");
+    let index = config.dataobj.searchistory.findIndex(function (elem) {
+      return elem.toLowerCase() === city.toLowerCase();
+    });
+    if (index >= 0) {
+      console.log(city, " is found in the history list at ", index);
+      config.dataobj.searchistory.splice(index, 1); // 2nd parameter means remove one item only
+      config.dataobj.searchistory.push(city);
+      displaysearchhistory();
+      config.store_data();
     } else {
       config.dataobj.searchistory.push(city); // if not, add the city to the search history
       console.log("Added city ", city, " to ", config.dataobj.searchistory);
