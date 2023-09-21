@@ -15,7 +15,7 @@
     <!-- Title Header -->
     <header>
       <!-- daisyui drawer -->
-      <div class="drawer">
+      <div class="drawer" style="z-index: 100;">
         <input id="my-drawer" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content">
           <!-- Page content here -->
@@ -37,7 +37,7 @@
         <div class="drawer-side">
           <label for="my-drawer" class="drawer-overlay"></label>
           <!-- Drawer content here -->
-          <div class="navbar bg-base-100 w-[100%-5px]">
+          <div class="navbar bg-gradient-to-b from-white to-transparent w-[100%-5px]">
             <div class="navbar-start">
               <div class="dropdown">
                 <label tabindex="0" class="btn btn-ghost lg:hidden">
@@ -53,13 +53,14 @@
                   class="menu menu-sm dropdown-content mt-3 z-[-10] p-2 shadow bg-base-100 rounded-box w-52">
                   <li><a>Background</a></li>
                   <li>
-                    <a>Units</a>
-                    <ul class="p-2">
-                      <li><a>Metric</a></li>
-                      <li><a>Imperial</a></li>
+                    <div class="unitselector"><a>Units</a></div>
+                    <ul class="p-2 menuselection-units">
+                      <li><a data-units="metric">Metric (°C)</a></li>
+                      <li><a data-units="imperial">Imperial (°F)</a></li>
+                      <li><a data-units="standard">Standard (°K)</a></li>
                     </ul>
                   </li>
-                  <li><a>Clear History</a></li>
+                  <li><a id="clearhistory">Clear History</a></li>
                 </ul>
               </div>
             </div>
@@ -67,15 +68,16 @@
               <ul class="menu menu-horizontal px-1">
                 <li><a>Background</a></li>
                 <li tabindex="0">
-                  <details>
+                  <details class="unitselector">
                     <summary>Units</summary>
-                    <ul class="p-2">
-                      <li><a>Metric</a></li>
-                      <li><a>Imperial</a></li>
+                    <ul class="p-2 menuselection-units">
+                      <li><a data-units="metric">Metric (°C)</a></li>
+                      <li><a data-units="imperial">Imperial (°F)</a></li>
+                      <li><a data-units="standard">Standard (°K)</a></li>
                     </ul>
                   </details>
                 </li>
-                <li><a>Clear History</a></li>
+                <li><a id="clearhistory2">Clear History</a></li>
               </ul>
             </div>
             <div class="navbar-end">
@@ -94,84 +96,174 @@
     </header>
 
 
-    <!-- row -->
+    <!-- main row -->
     <main class="flex m-1 gap-1">
+
       <!-- column 1 aside -->
-      <aside class="flex-col w-1/4 max-w-[25%] bg-white bg-opacity-20">
+      <aside class="flex-col w-1/4 max-w-[25%] bg-transparent relative">
+
+        <div class="w-full h-20"></div>
+
         <!-- map -->
         <!--src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d304.52107673255756!2d-97.74119202402814!3d30.286582339128955!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b577df4246bd%3A0xb7177c1de304f7f6!2sTexas%20Union!5e0!3m2!1sen!2ssg!4v1694692207215!5m2!1sen!2ssg"-->
-        <iframe class="w-full h-24" style="border: 0" allowfullscreen="" loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="mainmap" class="w-full h-64 m-1 rounded-2xl bg-opacity-20 opacity-50 hover:opacity-100" style="border: 0" allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.google.com/maps/embed/v1/place?q=Singapore&key=AIzaSyDAKGh9hM6lkhtz5MNmuUehgwnvtLVjYr8&center=1.2985181,103.8332306&zoom=14"></iframe>
+
+        <!-- <br /><small><a href="https://www.openstreetmap.org/#map=19/1.28947/103.86275">View Larger Map</a></small> -->
+        <!--
+        <iframe class="w-full h-48" style="border: 0" allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=103.86135309934618%2C1.2883843863901874%2C103.86413723230365%2C1.2905591070382145&amp;layer=mapnik"></iframe>
+        <br /><small><a href="https://www.openstreetmap.org/#map=19/1.28947/103.86275">View Larger Map</a></small>
+        -->
+        <!--
+        <iframe width="425" height="350"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=103.86135309934618%2C1.2883843863901874%2C103.86413723230365%2C1.2905591070382145&amp;layer=mapnik"
+          style="border: 1px solid black"></iframe><br /><small><a
+            href="https://www.openstreetmap.org/#map=19/1.28947/103.86275">View Larger Map</a></small>
+        -->
 
         <!-- search section for cities -->
-        <section class="form-control w-full gap-1 bg-opacity-20">
-          <label class="label">
-            <span class="label-text w-full max-w-xs text-2xl">Search for a City</span>
-          </label>
-          <input id="citychoice" type="text" placeholder="Type here"
-            class="input input-bordered w-full input-primary mt-1 mr-1" />
-          <p id="status"></p>
-          <a id="map-link" target="_blank"></a>
+        <section class="form-control w-full gap-1 bg-transparent">
+
+          <!-- City input using details/summary (list can be styled but no autocomplete)-->
+          <div class="flex">
+            <div class="relative w-full">
+
+              <!-- City search text input -->
+              <input id="citychoice" type="text" placeholder="Enter City Name" data-latitude="1.2985181"
+                data-longitude="103.8332306"
+                class="block input input-bordered bg-gray-50 bg-opacity-20 p-2.5 w-full z-20 text-2xl [text-shadow:_2_2px_0_rgb(0_0_0_/_40%)] transition-all hover:bg-gray-50 hover:text-black rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500">
+              <details id="citychoicedetails"
+                class="dropdown dropdown-end absolute top-0 right-0 p-2.5 text-2xl font-medium h-full text-black bg-transparent [text-shadow:_2_2px_0_rgb(0_0_0_/_40%)] rounded-r-lg transition-all hover:bg-gray-50 hover:text-black focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+
+                <!-- City search icon button -->
+                <summary tabindex="0" id="lookupcity" type="button" class="h-full">
+                  <svg class="w-5 h-full" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                  </svg>
+                </summary>
+
+                <!-- City search results pop up menu -->
+                <ul id="cityoptions" class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
+                  <!-- element examples:
+                  <li><a>Item 1</a></li>
+                  <li><a>Item 2</a></li>
+                  -->
+                </ul>
+              </details>
+            </div>
+          </div>
+
+          <!-- hidden modal error dialog if user searches for an empty string -->
+          <dialog id="nocityname_modal" class="modal">
+            <div class="modal-box">
+              <h3 class="font-bold text-lg">Nothing to search for</h3>
+              <p class="py-4">Please type in a city name. Click on the search icon to find similar cities.</p>
+              <div class="modal-action">
+                <form method="dialog">
+                  <!-- if there is a button in form, it will close the modal -->
+                  <button class="btn">Ok</button>
+                </form>
+              </div>
+            </div>
+          </dialog>
+
+          <!-- show latitude / longitude -->
+          <!--
+          <div class="bg-transparent w-56 rounded-box w-full text-2xl opacity-80">
+            <p id="status">Status</p>
+            <a id="map-link" target="_blank">Coordinates</a>
+          </div>
+          -->
+
+          <!-- Buttons to get user's coordinates and to get the weather -->
           <div class="row flex gap-1 mr-1">
-            <button id="find-me" class="btn btn-primary w-1/2">Find Me</button>
-            <button id="getweather" class="btn btn-primary w-1/2">Get Weather</button>
+            <button id="find-me" class="btn gray-50 bg-opacity-20 w-1/2">Find Me</button>
+            <button id="getweather" class="btn gray-50 bg-opacity-20 w-1/2">Get Weather</button>
           </div>
         </section>
 
-        <ul id="searchhistory" class="menu bg-white w-56 rounded-box w-full text-2xl mt-1 bg-opacity-20">
-          <li class="menu-title">Search History</li>
-          <li><a>City 1</a></li>
-          <li><a>City 2</a></li>
-          <li><a>City 3</a></li>
-        </ul>
+        <!-- history of city names that we retrieved the weather from -->
+        <!--        <ul
+          class="menu bg-gradient-to-b from-gray-50 to-transparent bg-opacity-50 w-56 rounded-box w-full text-2xl mt-1 bg-opacity-20 transition-all hover:bg-white">
+          <li>-->
+        <details
+          class="menu bg-gradient-to-b from-gray-50 to-transparent bg-opacity-20 w-56 rounded-box w-full text-2xl mt-1 bg-opacity-20 transition-all hover:bg-white"
+          open>
+          <summary class="menu-title menu-dropdown-toggle">Search History</summary>
+          <ul id="searchhistory" class="menu-dropdown">
+            <!-- element example
+                <li><a>City 1</a></li>
+                <li><a>City 2</a></li>
+                <li><a>City 3</a></li>
+                -->
+          </ul>
+        </details>
+
       </aside>
 
       <!-- column 2 - forecast results column-->
       <div class="flex-col w-3/4">
-        <div id="todaysdash" class="w-full rounded-lg bg-cyan-200 bg-opacity-20 bg-cover bg-center">
-          <!-- style="background-image: url(https://daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.jpg);"
-          <div class="hero-overlay bg-opacity-80"></div> -->
-          <div class="text-neutral-content w-full p-5">
-            <div class="flex flex-col">
-              <section
-                class="self-end gap-1 mb-1 p-2 rounded-lg text-black bg-white bg-opacity-80 leading-6 w-fit">
-                <h1 class="mb-5 text-4xl font-bold" style="flex-shrink: 3">
-                  <span id="selectedcity">Weather Forecast</span>
-                </h1>
-                <p class="mb-5 text-2xl font-bold"><span id="todaysdate">5 day weather forecast</span></p>
-              </section>
-
-              <!-- today's weather cards -->
-              <section id="todaysweather" class="row flex flex-row gap-1 justify-end">
-                <div class="card flex bg-black shadow-xl bg-opacity-80 hover:bg-opacity-50">
-                  <figure class="px-1 pt-1">
-                    <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="day" class="rounded-xl" />
-                  </figure>
-                  <div class="card-body m-2 p-2">
-                    <h2 class="card-title">11 am</h2>
-                    <p>
-                      Temp: <span>30.2 C</span><br />
-                      Humidity: <span>68</span><br />
-                      Wind: <span>5.47 Kph</span>
-                    </p>
+        <div id="todaysdash" class="w-full rounded-2xl bg-transparent">
+          <div class="flex flex-col">
+            <section
+              class="self-end gap-1 mb-1 rounded-2xl text-black bg-transparent leading-6 w-fit flex flex-row bg-gradient-to-b from-gray-50 to-transparent hover:bg-gray-50">
+              <div class="card card-side shadow-2xl">
+                <figure id="todaysweathericon" class="opacity-80 min-w-[100px] text-6xl">☀️</figure>
+                <div class="card-body">
+                  <h1 class="mb-5 text-4xl font-bold" style="flex-shrink: 3">
+                    <span id="selectedcity">Weather Forecast</span>
+                  </h1>
+                  <p class="mb-5 text-2xl font-bold">
+                    <span id="todaysdate">5 day weather forecast</span>
+                  </p>
+                  <p class="text-2xl">
+                    <span id="todaysweatherdescription" class="capitalize">forecast description</span>
+                  <p id="todaysweatherdata" class="text-2xl">Temperature, Humidity</p>
+                  <div class="flex flex-row text-2xl">
+                    <span class="arrowcontainer flex"><span id="winddirection"
+                        class="text-3xl w-fit h-fit font-bold">⇧</span></span>
+                    <span id="todaysweatherspeed"> wind direction & speed</span>
                   </div>
+                  </p>
                 </div>
+              </div>
+            </section>
 
-                <div class="card flex bg-cyan-200 shadow-xl bg-opacity-80 text-black hover:bg-opacity-50">
-                  <figure class="px-1 pt-1">
-                    <img src="https://openweathermap.org/img/wn/04n@2x.png" alt="night" class="rounded-xl" />
-                  </figure>
-                  <div class="card-body m-2 p-2">
-                    <h2 class="card-title">2 pm</h2>
-                    <p>
-                      Temp: <span>30.2 C</span><br />
-                      Humidity: <span>68</span><br />
-                      Wind: <span>5.47 Kph</span>
-                    </p>
-                  </div>
+            <!-- today's weather cards -->
+            <section id="todaysweather" class="row flex flex-row gap-1 justify-end">
+              <div class="card flex bg-black shadow-xl bg-opacity-80 transition-all hover:bg-opacity-50">
+                <figure class="px-1 pt-1">
+                  <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="day" class="rounded-xl" />
+                </figure>
+                <div class="card-body m-2 p-2">
+                  <h2 class="card-title">11 am</h2>
+                  <p>
+                    Temp: <span>30.2 C</span><br />
+                    Humidity: <span>68</span><br />
+                    Wind: <span>5.47 Kph</span>
+                  </p>
                 </div>
-              </section>
-            </div>
+              </div>
+
+              <div class="card flex bg-cyan-200 shadow-xl bg-opacity-80 text-black hover:bg-opacity-50">
+                <figure class="px-1 pt-1">
+                  <img src="https://openweathermap.org/img/wn/04n@2x.png" alt="night" class="rounded-xl" />
+                </figure>
+                <div class="card-body m-2 p-2">
+                  <h2 class="card-title">2 pm</h2>
+                  <p>
+                    Temp: <span>30.2 C</span><br />
+                    Humidity: <span>68</span><br />
+                    Wind: <span>5.47 Kph</span>
+                  </p>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
