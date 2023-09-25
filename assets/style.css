@@ -15,3 +15,10 @@
   font-size: 100px;
   transition: all 0.4s ease;
 }
+
+/* place the day's weather card at the top, the 5-day at the bottom of the screen.
+   Commented out because tailwind doesn't have this and seems to override this
+.mycolumn-2 {
+  justify-content: space-between;
+}
+*/

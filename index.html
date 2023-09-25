@@ -97,17 +97,33 @@
 
 
     <!-- main row -->
-    <main class="flex m-1 gap-1">
+    <main class="flex m-1 gap-1 min-h-screen">
 
       <!-- column 1 aside -->
       <aside class="flex-col w-1/4 max-w-[25%] bg-transparent relative">
 
         <div class="w-full h-20"></div>
 
+        <!-- Modal replacement for alert(). Open the modal using ID.showModal() method -->
+        <dialog id="my_modal_1" class="modal">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg pb-2">Alert</h3>
+            <p id="errormessage"></p>
+            <p id="errormessage2"></p>
+            <p class="py-2">Press ESC key or click the button below to close</p>
+            <div class="modal-action">
+              <form method="dialog">
+                <!-- if there is a button in form, it will close the modal -->
+                <button class="btn">Close</button>
+              </form>
+            </div>
+          </div>
+        </dialog>
+
         <!-- map -->
         <!--src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d304.52107673255756!2d-97.74119202402814!3d30.286582339128955!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b577df4246bd%3A0xb7177c1de304f7f6!2sTexas%20Union!5e0!3m2!1sen!2ssg!4v1694692207215!5m2!1sen!2ssg"-->
-        <iframe id="mainmap" class="w-full h-64 m-1 rounded-2xl bg-opacity-20 opacity-50 hover:opacity-100" style="border: 0" allowfullscreen="" loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
+        <iframe id="mainmap" class="w-full h-64 m-1 rounded-2xl bg-opacity-20 opacity-50 hover:opacity-100"
+          style="border: 0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
           src="https://www.google.com/maps/embed/v1/place?q=Singapore&key=AIzaSyDAKGh9hM6lkhtz5MNmuUehgwnvtLVjYr8&center=1.2985181,103.8332306&zoom=14"></iframe>
 
         <!-- <br /><small><a href="https://www.openstreetmap.org/#map=19/1.28947/103.86275">View Larger Map</a></small> -->
@@ -207,24 +223,25 @@
       </aside>
 
       <!-- column 2 - forecast results column-->
-      <div class="flex-col w-3/4">
+      <div class="mycolumn-2 flex flex-col w-3/4 min-h-screen" style="justify-content: space-between;">
         <div id="todaysdash" class="w-full rounded-2xl bg-transparent">
-          <div class="flex flex-col">
+          <div class="flex flex-col bg-transparent">
             <section
-              class="self-end gap-1 mb-1 rounded-2xl text-black bg-transparent leading-6 w-fit flex flex-row bg-gradient-to-b from-gray-50 to-transparent hover:bg-gray-50">
-              <div class="card card-side shadow-2xl">
-                <figure id="todaysweathericon" class="opacity-80 min-w-[100px] text-6xl">☀️</figure>
+              class="self-end gap-1 mb-1 rounded-2xl text-black bg-transparent w-fit flex flex-wrap flex-row flex-row justify-end">
+              <div id="todayscard"
+                class="card card-side shadow-2xl bg-gradient-to-b from-gray-300 to-transparent hover:bg-gray-50">
+                <figure id="todaysweathericon" class="opacity-80 min-w-[100px]">☀️</figure>
                 <div class="card-body">
-                  <h1 class="mb-5 text-4xl font-bold" style="flex-shrink: 3">
-                    <span id="selectedcity">Weather Forecast</span>
+                  <h1 class="mb-3 text-2xl font-bold" style="flex-shrink: 3">
+                    <span id="selectedcity">Weather</span>
                   </h1>
-                  <p class="mb-5 text-2xl font-bold">
-                    <span id="todaysdate">5 day weather forecast</span>
+                  <p class="mb-1 text-lg font-bold">
+                    <span id="todaysdate"></span>
                   </p>
-                  <p class="text-2xl">
+                  <p class="text-lg">
                     <span id="todaysweatherdescription" class="capitalize">forecast description</span>
-                  <p id="todaysweatherdata" class="text-2xl">Temperature, Humidity</p>
-                  <div class="flex flex-row text-2xl">
+                  <p id="todaysweatherdata" class="text-lg">Temperature, Humidity</p>
+                  <div class="flex flex-row text-lg">
                     <span class="arrowcontainer flex"><span id="winddirection"
                         class="text-3xl w-fit h-fit font-bold">⇧</span></span>
                     <span id="todaysweatherspeed"> wind direction & speed</span>
@@ -232,11 +249,12 @@
                   </p>
                 </div>
               </div>
+              <div id="dayforecast" class="self-end gap-1 mb-1 rounded-3xl text-black bg-transparent flex flex-wrap flex-row justify-end"></div>
             </section>
 
             <!-- today's weather cards -->
-            <section id="todaysweather" class="row flex flex-row gap-1 justify-end">
-              <div class="card flex bg-black shadow-xl bg-opacity-80 transition-all hover:bg-opacity-50">
+            <section id="todaysweather" class="row flex flex-row gap-1 justify-end transition-all">
+              <div class="card flex bg-black shadow-xl bg-opacity-80 transition-all hover:bg-opacity-50 transition-all">
                 <figure class="px-1 pt-1">
                   <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="day" class="rounded-xl" />
                 </figure>

@@ -31,7 +31,7 @@ var city = {
   longitude: 0,
 };
 
-var myapikey = ""; // Don't store the API key in the src code
+// var myapikey = ""; // Don't store the API key in the src code // changed - publish it in private.js instead for easier public access
 
 // Define today's forecast cards in html
 function createElementFromHTML(htmlString) {
@@ -42,20 +42,20 @@ function createElementFromHTML(htmlString) {
 }
 var daycard = createElementFromHTML(
   `
-    <div class="card flex shadow-xl bg-opacity-90 hover:bg-opacity-50">
-      <figure class="px-1 pt-1">
+    <div class="card flex shadow-xl relative block bg-opacity-90 hover:bg-opacity-50 transition-all overflow-hidden transition-all">
+      <figure class="px-1 pt-1 w-full">
         <img
           src="https://openweathermap.org/img/wn/10d@2x.png"
           alt="day"
           class="rounded-xl"
         />
       </figure>
-      <div class="card-body m-2 p-2">
+      <div class="card-body mx-2 my-1 px-2 py-1">
         <h2 class="card-title">11 am</h2>
         <p>
           Temp: <span>30.2 C</span><br />
           Humidity: <span>68</span><br />
-          Wind: <span>5.47 Kph</span>
+          Wind: <span>5.47</span><span>m/s</span>
         </p>
       </div>
     </div>
@@ -66,7 +66,7 @@ var daycard = createElementFromHTML(
 class weatherdashdata {
   constructor() {
     this.dataobj = {};
-    this.dataobj.searchistory = []; // ["Singapore", "Seattle", "Tokyo", "Amsterdam", "Sydney"];
+    this.dataobj.searchistory = []; // [{name: "Singapore", lat: latitude, lng: longitude}, {name: "Seattle",  lat: latitude, lng: longitude}];
     this.dataobj.units = "metric"; // metric (°C), imperial (°F), standard (°K)
     this.dataobj.latitude = default_latitude; // add a default location
     this.dataobj.longitude = default_longitude;
@@ -106,7 +106,7 @@ function getapikey() {
     console.log(!myapikey, myapikey);
     while (!myapikey) {
       myapikey = prompt("Please enter an API key");
-      alert("You entered " + myapikey);
+      modalalert("You entered " + myapikey);
       let text = "You entered " + myapikey + "\nStore this key in localstore?";
       console.log(text);
       if (confirm(text)) {
@@ -122,10 +122,6 @@ function getapikey() {
 }
 
 function call_api(apilink) {
-  function errorCallback(error) {
-    console.log("Error:", error.message);
-  }
-
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
@@ -143,12 +139,20 @@ function call_api(apilink) {
             'url("' + data[0].urls.full + "&w=" + window.innerWidth + '")';
         });
       } else {
-        alert("Error: " + response.statusText);
+        modalalert("Error: " + response.statusText);
       }
     })
     .catch(function (error) {
       console.log("Error:", error);
     });
+}
+
+function modalalertx(textmessage, sourcemessage) {
+  document.getElementById("errormessage").textContent = textmessage;
+  if (sourcemessage) {
+    document.getElementById("errormessage2").textContent = sourcemessage;
+  }
+  my_modal_1.showModal();
 }
 
 // Display a picture of the place that we are tracking the weather for
@@ -175,10 +179,6 @@ function rendercityimage(city) {
   // document.getElementById('todaysdash').style.backgroundImage = 'url("./assets/06-server-side-apis-homework-demo.png")';
   //content.photos[0].image.web
 
-  function errorCallback(error) {
-    console.log("Error:", error.message);
-  }
-
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
@@ -189,7 +189,7 @@ function rendercityimage(city) {
           document.getElementById("todaysdash").style.backgroundImage = 'url("' + data.photos[0].image.web + '")';
         });
       } else {
-        alert("Error: " + response.statusText);
+        modalalert("Error: " + response.statusText);
       }
     })
     .catch(function (error) {
@@ -198,7 +198,7 @@ function rendercityimage(city) {
   */
 }
 
-// Get weather data
+// Get today's weather data
 //   api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}
 //   api.openweathermap.org/data/2.5/forecast?q={city name}&appid={API key}
 function getweather(city) {
@@ -213,10 +213,6 @@ function getweather(city) {
     config.dataobj.units +
     "&appid=2baf085ed1bbea0d1b7d521e3687a9b9";
 
-  function errorCallback(error) {
-    console.log("Error:", error.message);
-  }
-
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
@@ -228,7 +224,7 @@ function getweather(city) {
           // end parse openweathermap API response */
         });
       } else {
-        alert("Error: " + response.statusText);
+        modalmodalalert("Error: " + response.statusText);
       }
     })
     .catch(function (error) {
@@ -241,7 +237,6 @@ function getweather(city) {
     let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
 
     console.log("today's weather:", weather);
-    // transform: rotate(45deg);
 
     if (w_isday) {
       document.getElementById("todaysweathericon").classList.add("bg-cyan-200");
@@ -265,17 +260,13 @@ function getweather(city) {
 
     document.getElementById("winddirection").style.transform = "rotate(" + weather.wind.deg + "deg)";
 
+    var windgust = "";
+    if (weather.wind.gust) {
+      windgust = weather.wind.gust + " " + unit_dist[config.dataobj.units] + " (gust)";
+    }
     var weatherspeed =
-      "<p>⠀" +
-      weather.wind.speed +
-      " " +
-      unit_dist[config.dataobj.units] +
-      " (wind) " +
-      weather.wind.gust +
-      " " +
-      unit_dist[config.dataobj.units] +
-      " (gust)</p>";
-    console.log(weatherspeed);
+      "<p>⠀" + weather.wind.speed + " " + unit_dist[config.dataobj.units] + " (wind) " + windgust + "</p>";
+    // console.log(weatherspeed);
     document.getElementById("todaysweatherspeed").innerHTML = weatherspeed;
   }
 }
@@ -284,46 +275,74 @@ function getweather(city) {
 //   api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
 //   api.openweathermap.org/data/2.5/forecast?q={city name}&appid={API key}
 function getforecast(city) {
-  //let forecast = JSON.parse(testforecast);
+  //let forecast = JSON.parse(testforecast); // debug
 
-  let apilink =
-    "https://api.openweathermap.org/data/2.5/forecast?lat=" +
+  var firstdata = {}; // store data from first API call
+
+  // first API call (onecall is the only one that has daily forecasts)
+  var apilink =
+    "https://api.openweathermap.org/data/3.0/onecall?lat=" +
     config.dataobj.latitude +
     "&lon=" +
     config.dataobj.longitude +
-    "&units=" +
+    "&exclude=minutely,hourly&units=" +
     config.dataobj.units +
-    "&appid=2baf085ed1bbea0d1b7d521e3687a9b9";
-
-  function errorCallback(error) {
-    console.log("Error:", error.message);
-  }
+    "&appid=" +
+    myapikeys.openweatheronecall;
 
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
-        console.log("content for  openweatherapi response :", response);
+        console.log("content for onecall  openweatherapi response :", response);
         response.json().then(function (data) {
-          console.log("json content for openweatherapi call: ", data);
-          displayforecast(data);
+          console.log("json content for onecall openweatherapi call: ", data);
+          firstdata = data;
+          console.log("onecall result: ", firstdata);
+
+          // second API call (3-hour forecast per API requirement)
+          apilink =
+            "https://api.openweathermap.org/data/2.5/forecast?lat=" +
+            config.dataobj.latitude +
+            "&lon=" +
+            config.dataobj.longitude +
+            "&units=" +
+            config.dataobj.units +
+            "&appid=" +
+            myapikeys.openweather;
+
+          fetch(apilink)
+            .then(function (response) {
+              if (response.ok) {
+                console.log("content for  openweatherapi response :", response);
+                response.json().then(function (data) {
+                  console.log("json content for openweatherapi call: ", data);
+                  displayforecast(data, firstdata);
+                  return;
+                  // end parse openweathermap API response */
+                });
+              } else {
+                modalalert("Error: " + response.statusText);
+              }
+            })
+            .catch(function (error) {
+              console.log("Error:", error);
+            });
           return;
           // end parse openweathermap API response */
         });
       } else {
-        alert("Error: " + response.statusText);
+        modalalert("Error: " + response.statusText);
       }
     })
     .catch(function (error) {
       console.log("Error:", error);
     });
 
-  function displayforecast(forecast) {
+  function displayforecast(forecast, forecast1) {
     // Display first day's forecast
-    console.log(forecast);
-    let thisdate = dayjs.unix(forecast.list[0].dt);
-    let prevdate = thisdate;
-    let firstdate = thisdate;
-    let i = 0;
+    console.log("displayforecast ", forecast);
+    console.log("display first forecast", forecast);
+    let thisdate = dayjs.unix(forecast1.daily[0].dt);
 
     // Display the city's name and date on the main dashboard
     document.getElementById("selectedcity").textContent = city;
@@ -331,18 +350,61 @@ function getforecast(city) {
 
     // Clear first day card
     document.getElementById("todaysweather").replaceChildren();
+    document.getElementById("dayforecast").replaceChildren();
     document.getElementById("fivedayforecast").replaceChildren();
 
-    while (i < forecast.list.length) {
-      while (thisdate.date() === prevdate.date()) {
-        let wtemp = Math.round(forecast.list[i].main.temp * 10) / 10;
-        let whumidity = forecast.list[i].main.humidity;
-        let wspeed = forecast.list[i].wind.speed;
-        let ticon = forecast.list[i].weather[0].icon;
-        let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
-        let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
-        let wdescription = forecast.list[i].weather[0].description;
-        /* console.log(
+    // create 5 day forecast divs from forecast1
+    for (var j = 1; j <= 5; j++) {
+      thisdate = dayjs.unix(forecast1.daily[j].dt);
+      let wtemp = Math.round(forecast1.daily[j].temp.day * 10) / 10;
+      let whumidity = forecast1.daily[j].humidity;
+      let wspeed = forecast1.daily[j].wind_speed;
+      let ticon = forecast1.daily[j].weather[0].icon;
+      let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+      let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
+      let wdescription = forecast1.daily[j].summary;
+
+      let newdaycard = daycard.cloneNode(true);
+      newdaycard.querySelector("div > figure > img").src = wicon;
+      newdaycard.querySelector("div > div > h2").textContent = thisdate.format("ddd D MMM");
+      newdaycard.querySelector("div > div > p").innerHTML =
+        wdescription +
+        "<br>🌡 " +
+        wtemp +
+        unit_deg[config.dataobj.units] +
+        "<br>🌢 " +
+        whumidity +
+        "%<br>🌬 " +
+        wspeed +
+        '<span class="text-xs">' +
+        unit_dist[config.dataobj.units] +
+        "</span>";
+      if (w_isday) {
+        newdaycard.classList.add("bg-cyan-200", "text-black");
+      } else {
+        newdaycard.classList.add("bg-black", "text-white");
+      }
+      newdaycard.classList.add("w-1/5");
+      newdaycard.id = thisdate.date();
+      document.getElementById("fivedayforecast").appendChild(newdaycard); // or the five-day cards
+    }
+
+    // // create 3-hour forecast divs from forecast (old free API)
+    let i = 0;
+    thisdate = dayjs.unix(forecast.list[0].dt);
+    let prevdate = thisdate;
+    let firstdate = thisdate;
+
+    // while (i < forecast.list.length) {
+    while (thisdate.date() === prevdate.date()) {
+      let wtemp = Math.round(forecast.list[i].main.temp * 10) / 10;
+      let whumidity = forecast.list[i].main.humidity;
+      let wspeed = forecast.list[i].wind.speed;
+      let ticon = forecast.list[i].weather[0].icon;
+      let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+      let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
+      let wdescription = forecast.list[i].weather[0].description;
+      /* console.log(
           thisdate.format(),
           //" --- ",
           //forecast.list[i].dt_txt,
@@ -356,42 +418,44 @@ function getforecast(city) {
           wicon
         ); */
 
-        let newdaycard = daycard.cloneNode(true);
-        newdaycard.querySelector("div > figure > img").src = wicon;
-        newdaycard.querySelector("div > div > h2").textContent = thisdate.format("h a");
-        newdaycard.querySelector("div > div > p").innerHTML =
-          wdescription +
-          "<br>🌡 " +
-          wtemp +
-          unit_deg[config.dataobj.units] +
-          "<br>🌢 " +
-          whumidity +
-          "%<br>🌬: " +
-          wspeed +
-          unit_dist[config.dataobj.units];
-        if (w_isday) {
-          newdaycard.classList.add("bg-cyan-200", "text-black");
-        } else {
-          newdaycard.classList.add("bg-black", "text-white");
-        }
-
-        // Render first day card
-        if (thisdate.date() === firstdate.date()) {
-          document.getElementById("todaysweather").appendChild(newdaycard);
-        } else {
-          newdaycard.querySelector("div > div > h2").innerHTML = thisdate.format("DD/MM<br>h a");
-          document.getElementById("fivedayforecast").appendChild(newdaycard); // or the five-day cards
-        }
-
-        i++;
-        if (i >= forecast.list.length) {
-          break;
-        } else {
-          thisdate = dayjs.unix(forecast.list[i].dt);
-        }
+      let newdaycard = daycard.cloneNode(true);
+      newdaycard.querySelector("div > figure > img").src = wicon;
+      newdaycard.querySelector("div > div > h2").textContent = thisdate.format("h a");
+      newdaycard.querySelector("div > div > p").innerHTML =
+        wdescription +
+        "<br>🌡 " +
+        wtemp +
+        unit_deg[config.dataobj.units] +
+        "<br>🌢 " +
+        whumidity +
+        "%<br>🌬 " +
+        wspeed +
+        '<span class="text-xs">' +
+        unit_dist[config.dataobj.units] +
+        "</span>";
+      if (w_isday) {
+        newdaycard.classList.add("bg-cyan-200", "text-black");
+      } else {
+        newdaycard.classList.add("bg-black", "text-white");
       }
-      prevdate = thisdate;
+
+      // Draw first day card
+      if (thisdate.date() === firstdate.date()) {
+        document.getElementById("dayforecast").appendChild(newdaycard);
+      } else {
+        newdaycard.querySelector("div > div > h2").innerHTML = thisdate.format("DD/MM<br>h a");
+        document.getElementById("fivedayforecast").appendChild(newdaycard); // or the five-day cards
+      }
+
+      i++;
+      if (i >= forecast.list.length) {
+        break;
+      } else {
+        thisdate = dayjs.unix(forecast.list[i].dt);
+      }
     }
+    prevdate = thisdate;
+    // }
 
     /* debug
   for (var i = 0; i < forecast.list.length; i++) {
@@ -445,19 +509,9 @@ function getplacelocation(placename) {
           } else {
             cityoptionsdetails.setAttribute("open", true);
           }
-
-          /* datalist type (supported by newer browsers)
-          for (i = 0; i < data.length; i++) {
-            console.log(data[i]);
-            var cityitem = document.createElement("option");
-            cityitem.value = data[i].name + "," + data[i].state + "," + data[i].country;
-            console.log(cityitem.outerHTML);
-            cityoptions.appendChild(cityitem);
-          }
-          */
         });
       } else {
-        alert("Error: " + response.statusText);
+        modalalert("Error: " + response.statusText);
       }
     })
     .catch(function (error) {
@@ -476,14 +530,15 @@ function getplacename(position) {
 
   // Get the city name of the user's position with openweathermap API
   var apilink =
-    "http://api.openweathermap.org/geo/1.0/reverse?lat=" + latitude + "&lon=" + longitude + "&limit=&appid=" + myapikey;
+    "http://api.openweathermap.org/geo/1.0/reverse?lat=" +
+    latitude +
+    "&lon=" +
+    longitude +
+    "&limit=&appid=" +
+    myapikeys.openweather;
 
   // Get the city name of the user's position with google API
   // var apilink = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&key=" + myapikey;
-
-  function errorCallback(error) {
-    console.log("Error:", error.message);
-  }
 
   fetch(apilink)
     .then(function (response) {
@@ -514,7 +569,7 @@ function getplacename(position) {
           // end parse openweathermap API response */
         });
       } else {
-        alert("Error: " + response.statusText);
+        modalalert("Error: " + response.statusText);
       }
     })
     .catch(function (error) {
@@ -607,7 +662,14 @@ function displaysearchhistory() {
   */
   for (var i = config.dataobj.searchistory.length - 1; i >= 0; i--) {
     var newitem = document.createElement("li");
-    newitem.innerHTML = '<a class="placename">' + config.dataobj.searchistory[i] + "</a>";
+    newitem.innerHTML =
+      '<a class="placename" data-lat="' +
+      config.dataobj.searchistory[i].lat +
+      '" data-lng="' +
+      config.dataobj.searchistory[i].lng +
+      '">' +
+      config.dataobj.searchistory[i].name +
+      "</a>";
     document.getElementById("searchhistory").appendChild(newitem);
   }
 }
@@ -625,7 +687,7 @@ function centermap(placename) {
     "," +
     citychoice.dataset.longitude +
     "&zoom=8&q=" +
-    placename;
+    encodeURIComponent(placename);
   console.log("Centering map to: ", maplink);
   document.getElementById("mainmap").setAttribute("src", maplink);
 }
@@ -654,16 +716,19 @@ document.querySelector("#getweather").addEventListener("click", function () {
   if (city) {
     // check if the city is already in the search history
     let index = config.dataobj.searchistory.findIndex(function (elem) {
-      return elem.toLowerCase() === city.toLowerCase();
+      return elem.name.toLowerCase() === city.toLowerCase();
     });
     if (index >= 0) {
       console.log(city, " is found in the history list at ", index);
+      var tempcity = config.dataobj.searchistory[index];
       config.dataobj.searchistory.splice(index, 1); // 2nd parameter means remove one item only
-      config.dataobj.searchistory.push(city);
+      config.dataobj.searchistory.push(tempcity);
+      config.dataobj.latitude = tempcity.lat;
+      config.dataobj.longitude = tempcity.lng;
       displaysearchhistory();
       config.store_data();
     } else {
-      config.dataobj.searchistory.push(city); // if not, add the city to the search history
+      config.dataobj.searchistory.push({ name: city, lat: config.dataobj.latitude, lng: config.dataobj.longitude }); // if not, add the city to the search history
       console.log("Added city ", city, " to ", config.dataobj.searchistory);
       displaysearchhistory();
       config.store_data();
@@ -681,7 +746,13 @@ document.querySelector("#getweather").addEventListener("click", function () {
 document.getElementById("searchhistory").addEventListener("click", function (event) {
   event.preventDefault();
   if (event.target.classList.contains("placename")) {
-    document.getElementById("citychoice").value = event.target.textContent;
+    var cityinput = document.getElementById("citychoice");
+    cityinput.value = event.target.textContent;
+    cityinput.dataset.latitude = event.target.dataset.lat;
+    cityinput.dataset.longitude = event.target.dataset.lng;
+    console.log("clicked on searchhistory: ", event.target);
+    config.dataobj.latitude = event.target.dataset.lat;
+    config.dataobj.longitude = event.target.dataset.lng;
   }
 });
 
@@ -705,7 +776,7 @@ document.getElementById("lookupcity").addEventListener("click", function (event)
 document.getElementById("cityoptions").addEventListener("click", function (event) {
   event.preventDefault();
   console.log(
-    "click on lookupcity button: ",
+    "clicked on cityoptions button: ",
     event.target.textContent,
     event.target.dataset.longitude,
     event.target.dataset.latitude
@@ -714,6 +785,9 @@ document.getElementById("cityoptions").addEventListener("click", function (event
   citychoice.value = event.target.textContent;
   citychoice.dataset.latitude = event.target.dataset.latitude;
   citychoice.dataset.longitude = event.target.dataset.longitude;
+  config.dataobj.latitude = event.target.dataset.latitude;
+  config.dataobj.longitude = event.target.dataset.longitude;
+  console.log("config ", config.dataobj);
   document.getElementById("citychoicedetails").removeAttribute("open");
 });
 
@@ -755,6 +829,14 @@ function clearhistory(event) {
 // Menu: add event listener to clear history on both responsive menus
 document.getElementById("clearhistory").addEventListener("click", clearhistory);
 document.getElementById("clearhistory2").addEventListener("click", clearhistory);
+
+// Today's Weather: add event listener to collapse day's cards
+document.getElementById("todayscard").addEventListener("click", function (event) {
+  event.preventDefault();
+  // console.log(event, " --- ", event.currentTarget);
+  document.getElementById("dayforecast").classList.toggle("hidden");
+  console.log("toggle ", document.getElementById("dayforecast").classList);
+});
 
 /* example calls
 1.2985181
