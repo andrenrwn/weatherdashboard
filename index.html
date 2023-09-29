@@ -65,7 +65,7 @@
               </div>
             </div>
             <div class="navbar-start hidden lg:flex">
-              <ul class="menu menu-horizontal px-1">
+              <ul class="menu menu-horizontal px-1 items-center">
                 <li><a>Background</a></li>
                 <li tabindex="0">
                   <details class="unitselector">
@@ -78,6 +78,14 @@
                   </details>
                 </li>
                 <li><a id="clearhistory2">Clear History</a></li>
+                <li>
+                  <div class="form-control">
+                    <label class="label cursor-pointer">
+                      <span class="label-text">City TZ&nbsp;</span>
+                      <input id="usecitytimezone" type="checkbox" class="toggle" checked />
+                    </label>
+                  </div>
+                </li>
               </ul>
             </div>
             <div class="navbar-end">
@@ -224,12 +232,12 @@
 
       <!-- column 2 - forecast results column-->
       <div class="mycolumn-2 flex flex-col w-3/4 min-h-screen" style="justify-content: space-between;">
-        <div id="todaysdash" class="w-full rounded-2xl bg-transparent">
+        <div id="todaysdash" class="w-full rounded-2xl bg-transparent ">
           <div class="flex flex-col bg-transparent">
             <section
-              class="self-end gap-1 mb-1 rounded-2xl text-black bg-transparent w-fit flex flex-wrap flex-row flex-row justify-end">
+              class="self-end gap-1 mb-1 rounded-2xl text-black bg-transparent w-fit flex flex-wrap flex-row justify-end transition-all">
               <div id="todayscard"
-                class="card card-side shadow-2xl bg-gradient-to-b from-gray-300 to-transparent hover:bg-gray-50">
+                class="card card-side shadow-2xl bg-gradient-to-b from-gray-300 to-transparent hover:bg-gray-50 transition-all">
                 <figure id="todaysweathericon" class="opacity-80 min-w-[100px]">☀️</figure>
                 <div class="card-body">
                   <h1 class="mb-3 text-2xl font-bold" style="flex-shrink: 3">
@@ -249,7 +257,9 @@
                   </p>
                 </div>
               </div>
-              <div id="dayforecast" class="self-end gap-1 mb-1 rounded-3xl text-black bg-transparent flex flex-wrap flex-row justify-end"></div>
+              <div id="dayforecast"
+                class="gap-1 mb-1 rounded-3xl text-black bg-transparent flex flex-wrap flex-row justify-end transition-all ease-in-out delay-300 overflow-hidden">
+              </div>
             </section>
 
             <!-- today's weather cards -->
@@ -368,10 +378,14 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+<!--
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
 <script type="text/javascript" src="testing/forecast.json"></script>
 <script type="text/javascript" src="testing/openweather_city.json"></script>
 <script type="text/javascript" src="testing/testdata.json"></script>
 <script type="text/javascript" src="testing/unsplash_random.json"></script>
+-->
 <script src="./scratch/private.js"></script>
 <script src="./assets/script.js"></script>
 

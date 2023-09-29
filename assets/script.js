@@ -1,3 +1,6 @@
+// Imports
+//dayjs.extend(window.dayjs_plugin_utc);
+
 // Global variables
 
 // Note: API keys are stored in private.js
@@ -31,6 +34,17 @@ var city = {
   longitude: 0,
 };
 
+// https://stackoverflow.com/questions/10087819/convert-date-to-another-timezone-in-javascript
+function convertTZ(date, tzString) {
+  let tzStr = "";
+  if (config.dataobj.usecitytimezone) {
+    // global variable
+    tzStr = tzString;
+  }
+
+  return (typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzStr });
+}
+
 // var myapikey = ""; // Don't store the API key in the src code // changed - publish it in private.js instead for easier public access
 
 // Define today's forecast cards in html
@@ -42,7 +56,7 @@ function createElementFromHTML(htmlString) {
 }
 var daycard = createElementFromHTML(
   `
-    <div class="card flex shadow-xl relative block bg-opacity-90 hover:bg-opacity-50 transition-all overflow-hidden transition-all">
+    <div class="card flex shadow-xl relative block bg-opacity-90 hover:bg-opacity-50 transition-all overflow-hidden items-stretch">
       <figure class="px-1 pt-1 w-full">
         <img
           src="https://openweathermap.org/img/wn/10d@2x.png"
@@ -70,6 +84,7 @@ class weatherdashdata {
     this.dataobj.units = "metric"; // metric (°C), imperial (°F), standard (°K)
     this.dataobj.latitude = default_latitude; // add a default location
     this.dataobj.longitude = default_longitude;
+    this.dataobj.usecitytimezone = true; // if the dashboard displays the city's timezone instead of the local browser's timezone
     this.storagekey = "weatherdashdata";
     this.load_data();
   }
@@ -338,15 +353,17 @@ function getforecast(city) {
       console.log("Error:", error);
     });
 
+  // 3-hourly forecast api, onecall api daily forecast
   function displayforecast(forecast, forecast1) {
     // Display first day's forecast
-    console.log("displayforecast ", forecast);
-    console.log("display first forecast", forecast);
+    console.log("display forecast ", forecast);
+    console.log("display onecall forecast", forecast1);
     let thisdate = dayjs.unix(forecast1.daily[0].dt);
-
     // Display the city's name and date on the main dashboard
     document.getElementById("selectedcity").textContent = city;
-    document.getElementById("todaysdate").textContent = thisdate.format("dddd, D MMMM YYYY");
+    document.getElementById("todaysdate").textContent = new dayjs(
+      convertTZ(new dayjs().format(), forecast1.timezone)
+    ).format("dddd, D MMMM YYYY h:m a");
 
     // Clear first day card
     document.getElementById("todaysweather").replaceChildren();
@@ -356,7 +373,7 @@ function getforecast(city) {
     // create 5 day forecast divs from forecast1
     for (var j = 1; j <= 5; j++) {
       thisdate = dayjs.unix(forecast1.daily[j].dt);
-      let wtemp = Math.round(forecast1.daily[j].temp.day * 10) / 10;
+      let wtemp = Math.round(forecast1.daily[j].temp.day * 10) / 10; // 0.1 digit precision
       let whumidity = forecast1.daily[j].humidity;
       let wspeed = forecast1.daily[j].wind_speed;
       let ticon = forecast1.daily[j].weather[0].icon;
@@ -366,7 +383,9 @@ function getforecast(city) {
 
       let newdaycard = daycard.cloneNode(true);
       newdaycard.querySelector("div > figure > img").src = wicon;
-      newdaycard.querySelector("div > div > h2").textContent = thisdate.format("ddd D MMM");
+      newdaycard.querySelector("div > div > h2").textContent = new dayjs(
+        convertTZ(thisdate, forecast1.timezone)
+      ).format("dddd, D MMMM YYYY");
       newdaycard.querySelector("div > div > p").innerHTML =
         wdescription +
         "<br>🌡 " +
@@ -391,9 +410,10 @@ function getforecast(city) {
 
     // // create 3-hour forecast divs from forecast (old free API)
     let i = 0;
-    thisdate = dayjs.unix(forecast.list[0].dt);
+    thisdate = dayjs.unix(parseInt(forecast.list[0].dt) + parseInt(forecast.city.timezone));
     let prevdate = thisdate;
     let firstdate = thisdate;
+    console.log(thisdate.date(), prevdate.date(), firstdate.date());
 
     // while (i < forecast.list.length) {
     while (thisdate.date() === prevdate.date()) {
@@ -422,8 +442,7 @@ function getforecast(city) {
       newdaycard.querySelector("div > figure > img").src = wicon;
       newdaycard.querySelector("div > div > h2").textContent = thisdate.format("h a");
       newdaycard.querySelector("div > div > p").innerHTML =
-        wdescription +
-        "<br>🌡 " +
+        "🌡 " +
         wtemp +
         unit_deg[config.dataobj.units] +
         "<br>🌢 " +
@@ -432,7 +451,10 @@ function getforecast(city) {
         wspeed +
         '<span class="text-xs">' +
         unit_dist[config.dataobj.units] +
+        "<br>" +
+        wdescription +
         "</span>";
+      newdaycard.classList.add("w-[125px]");
       if (w_isday) {
         newdaycard.classList.add("bg-cyan-200", "text-black");
       } else {
@@ -451,7 +473,7 @@ function getforecast(city) {
       if (i >= forecast.list.length) {
         break;
       } else {
-        thisdate = dayjs.unix(forecast.list[i].dt);
+        thisdate = dayjs.unix(parseInt(forecast.list[i].dt) + parseInt(forecast.city.timezone));
       }
     }
     prevdate = thisdate;
@@ -834,7 +856,8 @@ document.getElementById("clearhistory2").addEventListener("click", clearhistory)
 document.getElementById("todayscard").addEventListener("click", function (event) {
   event.preventDefault();
   // console.log(event, " --- ", event.currentTarget);
-  document.getElementById("dayforecast").classList.toggle("hidden");
+  document.getElementById("dayforecast").classList.toggle("w-0");
+  document.getElementById("dayforecast").classList.toggle("h-0");
   console.log("toggle ", document.getElementById("dayforecast").classList);
 });
 
