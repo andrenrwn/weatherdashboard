@@ -1,5 +1,5 @@
 // Imports
-//dayjs.extend(window.dayjs_plugin_utc);
+dayjs.extend(window.dayjs_plugin_utc);
 
 // Global variables
 
@@ -43,6 +43,56 @@ function convertTZ(date, tzString) {
   }
 
   return (typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzStr });
+}
+
+// determine if it is day or night based on the timestamp, sunrise and sunset
+function isday(timestamp, sunrise, sunset, tzoffset) {
+  let risemod =
+    ((sunrise + tzoffset) % 86400) -
+    (Math.floor((sunset + tzoffset) / 86400) - Math.floor((sunrise + tzoffset) / 86400)) * 86400;
+  let setmod = (sunset + tzoffset) % 86400;
+  let stampmod = (timestamp + tzoffset) % 86400;
+  console.log(timestamp, dayjs.unix(sunrise).format(), dayjs.unix(sunset).format(), stampmod, risemod, setmod);
+  if (stampmod >= risemod && stampmod < setmod) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// Drawer side event listeners
+// Modified from https://www.w3schools.com/howto/howto_js_collapsible.asp
+var drawers = document.getElementsByClassName("drawerside");
+
+function opendrawer(elementId) {
+  var thisdrawer = document.getElementById(elementId);
+  thisdrawer.classList.add("draweropen");
+  var content = thisdrawer.previousElementSibling;
+  content.style.maxWidth = content.scrollWidth + "px";
+}
+
+for (var i = 0; i < drawers.length; i++) {
+  drawers[i].addEventListener("click", function (event) {
+    event.preventDefault();
+    event.target.classList.toggle("draweropen");
+    var content = event.target.previousElementSibling;
+    console.log(content);
+    if (content.style.maxWidth) {
+      if (content.style.maxWidth != "0px") {
+        console.log(content.style.maxWidth);
+        content.style.maxWidth = "0px";
+        console.log(content.style.maxWidth);
+      } else {
+        console.log(content.style.maxWidth);
+        content.style.maxWidth = content.scrollWidth + "px";
+        console.log(content.style.maxWidth);
+      }
+    } else {
+      console.log(content.style.maxWidth);
+      content.style.maxWidth = content.scrollWidth + "px";
+      console.log(content.style.maxWidth);
+    }
+  });
 }
 
 // var myapikey = ""; // Don't store the API key in the src code // changed - publish it in private.js instead for easier public access
@@ -248,7 +298,13 @@ function getweather(city) {
 
   function displayweather(weather) {
     let ticon = weather.weather[0].icon;
-    let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+    //let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+    let w_isday = isday(
+      parseInt(weather.dt),
+      parseInt(weather.sys.sunrise),
+      parseInt(weather.sys.sunset),
+      parseInt(weather.timezone)
+    );
     let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
 
     console.log("today's weather:", weather);
@@ -355,15 +411,17 @@ function getforecast(city) {
 
   // 3-hourly forecast api, onecall api daily forecast
   function displayforecast(forecast, forecast1) {
+    // local variables
+    let timeoffset = parseFloat(forecast1.timezone_offset) / 3600;
     // Display first day's forecast
     console.log("display forecast ", forecast);
     console.log("display onecall forecast", forecast1);
-    let thisdate = dayjs.unix(forecast1.daily[0].dt);
+    let thisdate = dayjs.unix(parseInt(forecast1.daily[0].dt)).utcOffset(timeoffset);
     // Display the city's name and date on the main dashboard
     document.getElementById("selectedcity").textContent = city;
-    document.getElementById("todaysdate").textContent = new dayjs(
-      convertTZ(new dayjs().format(), forecast1.timezone)
-    ).format("dddd, D MMMM YYYY h:m a");
+    document.getElementById("todaysdate").textContent = dayjs()
+      .utcOffset(timeoffset)
+      .format("dddd, D MMMM YYYY h:mm a");
 
     // Clear first day card
     document.getElementById("todaysweather").replaceChildren();
@@ -372,20 +430,24 @@ function getforecast(city) {
 
     // create 5 day forecast divs from forecast1
     for (var j = 1; j <= 5; j++) {
-      thisdate = dayjs.unix(forecast1.daily[j].dt);
+      thisdate = dayjs.unix(parseInt(forecast1.daily[j].dt)).utc().utcOffset(timeoffset);
       let wtemp = Math.round(forecast1.daily[j].temp.day * 10) / 10; // 0.1 digit precision
       let whumidity = forecast1.daily[j].humidity;
       let wspeed = forecast1.daily[j].wind_speed;
       let ticon = forecast1.daily[j].weather[0].icon;
-      let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+      //let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+      let w_isday = isday(
+        forecast1.daily[j].dt,
+        forecast1.daily[j].sunrise,
+        forecast1.daily[j].sunset,
+        forecast1.timezone_offset
+      );
       let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
       let wdescription = forecast1.daily[j].summary;
 
       let newdaycard = daycard.cloneNode(true);
       newdaycard.querySelector("div > figure > img").src = wicon;
-      newdaycard.querySelector("div > div > h2").textContent = new dayjs(
-        convertTZ(thisdate, forecast1.timezone)
-      ).format("dddd, D MMMM YYYY");
+      newdaycard.querySelector("div > div > h2").textContent = thisdate.utc().format("ddd, D MMM YY");
       newdaycard.querySelector("div > div > p").innerHTML =
         wdescription +
         "<br>🌡 " +
@@ -404,24 +466,42 @@ function getforecast(city) {
         newdaycard.classList.add("bg-black", "text-white");
       }
       newdaycard.classList.add("w-1/5");
-      newdaycard.id = thisdate.date();
+      newdaycard.id = thisdate.utc().date();
       document.getElementById("fivedayforecast").appendChild(newdaycard); // or the five-day cards
     }
 
     // // create 3-hour forecast divs from forecast (old free API)
     let i = 0;
-    thisdate = dayjs.unix(parseInt(forecast.list[0].dt) + parseInt(forecast.city.timezone));
+    thisdate = dayjs.unix(parseInt(forecast.list[0].dt)).utc().utcOffset(timeoffset);
     let prevdate = thisdate;
     let firstdate = thisdate;
-    console.log(thisdate.date(), prevdate.date(), firstdate.date());
+    console.log(
+      "TIMESTAMP: ",
+      forecast.list[i].dt,
+      timeoffset,
+      "\n THISDATE ",
+      thisdate.utc(),
+      "\n THISDATEOFFSET ",
+      thisdate.utc().utcOffset(timeoffset),
+      "\n DATE: ",
+      thisdate.date(),
+      "\n UTCDATE: ",
+      thisdate.utc().date()
+    );
 
-    // while (i < forecast.list.length) {
-    while (thisdate.date() === prevdate.date()) {
+    // display all 3-hour forecast on the same day
+    while (thisdate.utc().date() === prevdate.utc().date()) {
       let wtemp = Math.round(forecast.list[i].main.temp * 10) / 10;
       let whumidity = forecast.list[i].main.humidity;
       let wspeed = forecast.list[i].wind.speed;
       let ticon = forecast.list[i].weather[0].icon;
-      let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+      //let w_isday = ticon.charAt(ticon.length - 1) === "d"; // is it day or night?
+      let w_isday = isday(
+        forecast.list[i].dt,
+        parseInt(forecast.city.sunrise),
+        parseInt(forecast.city.sunset),
+        forecast.city.timezone
+      );
       let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
       let wdescription = forecast.list[i].weather[0].description;
       /* console.log(
@@ -440,7 +520,7 @@ function getforecast(city) {
 
       let newdaycard = daycard.cloneNode(true);
       newdaycard.querySelector("div > figure > img").src = wicon;
-      newdaycard.querySelector("div > div > h2").textContent = thisdate.format("h a");
+      newdaycard.querySelector("div > div > h2").textContent = thisdate.utc().utcOffset(timeoffset).format("h a");
       newdaycard.querySelector("div > div > p").innerHTML =
         "🌡 " +
         wtemp +
@@ -462,10 +542,13 @@ function getforecast(city) {
       }
 
       // Draw first day card
-      if (thisdate.date() === firstdate.date()) {
+      if (thisdate.utc().date() === firstdate.utc().date()) {
         document.getElementById("dayforecast").appendChild(newdaycard);
       } else {
-        newdaycard.querySelector("div > div > h2").innerHTML = thisdate.format("DD/MM<br>h a");
+        newdaycard.querySelector("div > div > h2").innerHTML = thisdate
+          .utc()
+          .utcOffset(timeoffset)
+          .format("DD/MM<br>h a");
         document.getElementById("fivedayforecast").appendChild(newdaycard); // or the five-day cards
       }
 
@@ -473,7 +556,20 @@ function getforecast(city) {
       if (i >= forecast.list.length) {
         break;
       } else {
-        thisdate = dayjs.unix(parseInt(forecast.list[i].dt) + parseInt(forecast.city.timezone));
+        thisdate = dayjs.unix(parseInt(forecast.list[i].dt)).utcOffset(timeoffset);
+        console.log(
+          "TIMESTAMP: ",
+          forecast.list[i].dt,
+          timeoffset,
+          "\n THISDATE ",
+          thisdate.utc(),
+          "\n THISDATEOFFSET ",
+          thisdate.utc().utcOffset(timeoffset),
+          "\n DATE: ",
+          thisdate.date(),
+          "\n UTCDATE: ",
+          thisdate.utc().date()
+        );
       }
     }
     prevdate = thisdate;
