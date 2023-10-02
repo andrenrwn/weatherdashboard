@@ -167,8 +167,8 @@ class weatherdashdata {
 
 var config = new weatherdashdata(); // store the history and metric settings in the object "config".
 
-// Store an API key in local storage
-function getapikey() {
+// If we aren't publishing our API key, then ask the user for an API key and store it in local storage
+/* function getapikey() {
   let loadedapikey = localStorage.getItem("apikey");
 
   // If we don't have an API key, ask it from the user
@@ -192,6 +192,7 @@ function getapikey() {
     }
   }
 }
+ */
 
 function refresh_background_info() {
   let heading = "Background image information";
@@ -844,7 +845,7 @@ function centermap(placename) {
 
 // Start main() body of code
 
-getapikey();
+// getapikey();
 
 config.load_data();
 
