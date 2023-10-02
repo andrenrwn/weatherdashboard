@@ -37,7 +37,7 @@ var city = {
 // https://stackoverflow.com/questions/10087819/convert-date-to-another-timezone-in-javascript
 function convertTZ(date, tzString) {
   let tzStr = "";
-  if (config.dataobj.usecitytimezone) {
+  if (config.dataobj.useremotetimezone) {
     // global variable
     tzStr = tzString;
   }
@@ -47,6 +47,11 @@ function convertTZ(date, tzString) {
 
 // determine if it is day or night based on the timestamp, sunrise and sunset
 function isday(timestamp, sunrise, sunset, tzoffset) {
+  let offset = 0; // timezone display choice
+  if (config.dataobj.useremotetimezone) {
+    // global variable
+    offset = tzoffset;
+  }
   let risemod =
     ((sunrise + tzoffset) % 86400) -
     (Math.floor((sunset + tzoffset) / 86400) - Math.floor((sunrise + tzoffset) / 86400)) * 86400;
@@ -134,7 +139,7 @@ class weatherdashdata {
     this.dataobj.units = "metric"; // metric (°C), imperial (°F), standard (°K)
     this.dataobj.latitude = default_latitude; // add a default location
     this.dataobj.longitude = default_longitude;
-    this.dataobj.usecitytimezone = true; // if the dashboard displays the city's timezone instead of the local browser's timezone
+    this.dataobj.useremotetimezone = true; // if the dashboard displays the city's timezone instead of the local browser's timezone
     this.storagekey = "weatherdashdata";
     this.load_data();
   }
@@ -212,7 +217,7 @@ function call_api(apilink) {
     });
 }
 
-function modalalertx(textmessage, sourcemessage) {
+function modalalert(textmessage, sourcemessage) {
   document.getElementById("errormessage").textContent = textmessage;
   if (sourcemessage) {
     document.getElementById("errormessage2").textContent = sourcemessage;
@@ -490,7 +495,7 @@ function getforecast(city) {
     );
 
     // display all 3-hour forecast on the same day
-    while (thisdate.utc().date() === prevdate.utc().date()) {
+    while (thisdate.date() === prevdate.date()) {
       let wtemp = Math.round(forecast.list[i].main.temp * 10) / 10;
       let whumidity = forecast.list[i].main.humidity;
       let wspeed = forecast.list[i].wind.speed;
@@ -542,7 +547,7 @@ function getforecast(city) {
       }
 
       // Draw first day card
-      if (thisdate.utc().date() === firstdate.utc().date()) {
+      if (thisdate.date() === firstdate.date()) {
         document.getElementById("dayforecast").appendChild(newdaycard);
       } else {
         newdaycard.querySelector("div > div > h2").innerHTML = thisdate
