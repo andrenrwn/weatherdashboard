@@ -681,7 +681,7 @@ function getplacename(position) {
 
   // Get the city name of the user's position with openweathermap API
   var apilink =
-    "http://api.openweathermap.org/geo/1.0/reverse?lat=" +
+    "https://api.openweathermap.org/geo/1.0/reverse?lat=" +
     latitude +
     "&lon=" +
     longitude +
