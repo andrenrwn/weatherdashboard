@@ -213,7 +213,7 @@ function call_api(apilink) {
       if (response.ok) {
         // console.log(response);
         response.json().then(function (data) {
-          // console.log(data);
+          //console.log(data);
 
           // Teleport
           //console.log("image is at: " + data.photos[0].image.web);
@@ -223,8 +223,8 @@ function call_api(apilink) {
           // console.log("image is at: " + data[0].urls.full + "&w=" + window.innerWidth);
 
           backgroundimage.links = data[0].links.html;
-          if (data[0].links.description) {
-            backgroundimage.description = data[0].links.description;
+          if (data[0].description) {
+            backgroundimage.description = data[0].description;
           } else {
             backgroundimage.description = data[0].alt_description;
           }
