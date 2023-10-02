@@ -1,20 +1,20 @@
 // Imports
 dayjs.extend(window.dayjs_plugin_utc);
 
-// Global variables
-
-// Note: API keys are stored in private.js
+// Note: Required API keys are stored in config.js
 // var myapikeys = {
 //   unsplash: "";
 //   openweater: "";
 //   google: "";
 // };
 
+// Global variables
+
 //var latitude = 1.2985181;
-//var longitude = 103.8332306; // default location under the global scope
+//var longitude = 103.8332306; // default location (singapore) under the global scope
 
 var default_latitude = 9.643097;
-var default_longitude = 95.642956; // default location under the global scope
+var default_longitude = 95.642956; // default location (ocean) under the global scope
 
 var unit_deg = {
   standard: "°K",
@@ -33,9 +33,10 @@ var city = {
   latitude: 0,
   longitude: 0,
 };
+var backgroundimage = {};
 
 // https://stackoverflow.com/questions/10087819/convert-date-to-another-timezone-in-javascript
-function convertTZ(date, tzString) {
+/* function convertTZ(date, tzString) {
   let tzStr = "";
   if (config.dataobj.useremotetimezone) {
     // global variable
@@ -44,6 +45,7 @@ function convertTZ(date, tzString) {
 
   return (typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzStr });
 }
+ */
 
 // determine if it is day or night based on the timestamp, sunrise and sunset
 function isday(timestamp, sunrise, sunset, tzoffset) {
@@ -57,7 +59,7 @@ function isday(timestamp, sunrise, sunset, tzoffset) {
     (Math.floor((sunset + tzoffset) / 86400) - Math.floor((sunrise + tzoffset) / 86400)) * 86400;
   let setmod = (sunset + tzoffset) % 86400;
   let stampmod = (timestamp + tzoffset) % 86400;
-  console.log(timestamp, dayjs.unix(sunrise).format(), dayjs.unix(sunset).format(), stampmod, risemod, setmod);
+  // console.log(timestamp, dayjs.unix(sunrise).format(), dayjs.unix(sunset).format(), stampmod, risemod, setmod);
   if (stampmod >= risemod && stampmod < setmod) {
     return true;
   } else {
@@ -81,21 +83,21 @@ for (var i = 0; i < drawers.length; i++) {
     event.preventDefault();
     event.target.classList.toggle("draweropen");
     var content = event.target.previousElementSibling;
-    console.log(content);
+    // console.log(content);
     if (content.style.maxWidth) {
       if (content.style.maxWidth != "0px") {
-        console.log(content.style.maxWidth);
+        // console.log(content.style.maxWidth);
         content.style.maxWidth = "0px";
-        console.log(content.style.maxWidth);
+        // console.log(content.style.maxWidth);
       } else {
-        console.log(content.style.maxWidth);
+        // console.log(content.style.maxWidth);
         content.style.maxWidth = content.scrollWidth + "px";
-        console.log(content.style.maxWidth);
+        // console.log(content.style.maxWidth);
       }
     } else {
-      console.log(content.style.maxWidth);
+      // console.log(content.style.maxWidth);
       content.style.maxWidth = content.scrollWidth + "px";
-      console.log(content.style.maxWidth);
+      // console.log(content.style.maxWidth);
     }
   });
 }
@@ -173,22 +175,35 @@ function getapikey() {
   if (loadedapikey) {
     myapikey = loadedapikey;
   } else {
-    console.log(!myapikey, myapikey);
+    // console.log(!myapikey, myapikey);
     while (!myapikey) {
       myapikey = prompt("Please enter an API key");
       modalalert("You entered " + myapikey);
       let text = "You entered " + myapikey + "\nStore this key in localstore?";
-      console.log(text);
+      // console.log(text);
       if (confirm(text)) {
         localStorage.setItem("apikey", myapikey);
-        console.log("key stored");
+        // console.log("key stored");
       } else {
         myapikey = "";
-        console.log("key cleared");
+        // console.log("key cleared");
         break;
       }
     }
   }
+}
+
+function refresh_background_info() {
+  let heading = "Background image information";
+  if (backgroundimage.locationname) {
+    heading = backgroundimage.locationname;
+  }
+  document.getElementById("backgroundheading").innerHTML = `${heading}`;
+  document.getElementById(
+    "backgroundinfo"
+  ).innerHTML = `<h3 class="alert alert-info">${backgroundimage.description}</h3>
+  <p>download: <a href="${backgroundimage.links}" class="link link-info" target="_blank" rel="noopener noreferrer" alt="${backgroundimage.alt_description}">${backgroundimage.links}</a><br>
+  by ${backgroundimage.name}</p>`;
 }
 
 function call_api(apilink) {
@@ -197,23 +212,35 @@ function call_api(apilink) {
       if (response.ok) {
         // console.log(response);
         response.json().then(function (data) {
-          console.log(data);
+          // console.log(data);
 
           // Teleport
           //console.log("image is at: " + data.photos[0].image.web);
           //document.getElementById("todaysdash").style.backgroundImage = 'url("' + data.photos[0].image.web + '")';
 
           // unsplash
-          console.log("image is at: " + data[0].urls.full + "&w=" + window.innerWidth);
+          // console.log("image is at: " + data[0].urls.full + "&w=" + window.innerWidth);
+
+          backgroundimage.links = data[0].links.html;
+          if (data[0].links.description) {
+            backgroundimage.description = data[0].links.description;
+          } else {
+            backgroundimage.description = data[0].alt_description;
+          }
+          backgroundimage.alt_description = data[0].alt_description;
+          backgroundimage.name = data[0].user.name;
+          backgroundimage.locationname = data[0].location.name;
+          refresh_background_info();
+
           document.getElementById("mainscreen").style.backgroundImage =
             'url("' + data[0].urls.full + "&w=" + window.innerWidth + '")';
         });
       } else {
-        modalalert("Error: " + response.statusText);
+        modalalert("Error on retrieving background image: " + response.statusText);
       }
     })
     .catch(function (error) {
-      console.log("Error:", error);
+      modalalert("Error : " + error);
     });
 }
 
@@ -254,8 +281,8 @@ function rendercityimage(city) {
       if (response.ok) {
         // console.log(response);
         response.json().then(function (data) {
-          console.log(data);
-          console.log("image is at: " + data.photos[0].image.web);
+          // console.log(data);
+          // console.log("image is at: " + data.photos[0].image.web);
           document.getElementById("todaysdash").style.backgroundImage = 'url("' + data.photos[0].image.web + '")';
         });
       } else {
@@ -263,7 +290,7 @@ function rendercityimage(city) {
       }
     })
     .catch(function (error) {
-      console.log("Error:", error);
+      // console.log("Error:", error);
     });
   */
 }
@@ -286,9 +313,9 @@ function getweather(city) {
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
-        console.log("content for weather openweatherapi response :", response);
+        // console.log("content for weather openweatherapi response :", response);
         response.json().then(function (data) {
-          console.log("json content for weather openweatherapi call: ", data);
+          // console.log("json content for weather openweatherapi call: ", data);
           displayweather(data);
           return;
           // end parse openweathermap API response */
@@ -298,7 +325,7 @@ function getweather(city) {
       }
     })
     .catch(function (error) {
-      console.log("Error:", error);
+      // console.log("Error:", error);
     });
 
   function displayweather(weather) {
@@ -312,7 +339,7 @@ function getweather(city) {
     );
     let wicon = "https://openweathermap.org/img/wn/" + ticon + "@2x.png";
 
-    console.log("today's weather:", weather);
+    // console.log("today's weather:", weather);
 
     if (w_isday) {
       document.getElementById("todaysweathericon").classList.add("bg-cyan-200");
@@ -369,11 +396,11 @@ function getforecast(city) {
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
-        console.log("content for onecall  openweatherapi response :", response);
+        // console.log("content for onecall  openweatherapi response :", response);
         response.json().then(function (data) {
-          console.log("json content for onecall openweatherapi call: ", data);
+          // console.log("json content for onecall openweatherapi call: ", data);
           firstdata = data;
-          console.log("onecall result: ", firstdata);
+          // console.log("onecall result: ", firstdata);
 
           // second API call (3-hour forecast per API requirement)
           apilink =
@@ -389,9 +416,9 @@ function getforecast(city) {
           fetch(apilink)
             .then(function (response) {
               if (response.ok) {
-                console.log("content for  openweatherapi response :", response);
+                // console.log("content for  openweatherapi response :", response);
                 response.json().then(function (data) {
-                  console.log("json content for openweatherapi call: ", data);
+                  // console.log("json content for openweatherapi call: ", data);
                   displayforecast(data, firstdata);
                   return;
                   // end parse openweathermap API response */
@@ -401,7 +428,7 @@ function getforecast(city) {
               }
             })
             .catch(function (error) {
-              console.log("Error:", error);
+              // console.log("Error:", error);
             });
           return;
           // end parse openweathermap API response */
@@ -411,7 +438,7 @@ function getforecast(city) {
       }
     })
     .catch(function (error) {
-      console.log("Error:", error);
+      // console.log("Error:", error);
     });
 
   // 3-hourly forecast api, onecall api daily forecast
@@ -419,8 +446,8 @@ function getforecast(city) {
     // local variables
     let timeoffset = parseFloat(forecast1.timezone_offset) / 3600;
     // Display first day's forecast
-    console.log("display forecast ", forecast);
-    console.log("display onecall forecast", forecast1);
+    // console.log("display forecast ", forecast);
+    // console.log("display onecall forecast", forecast1);
     let thisdate = dayjs.unix(parseInt(forecast1.daily[0].dt)).utcOffset(timeoffset);
     // Display the city's name and date on the main dashboard
     document.getElementById("selectedcity").textContent = city;
@@ -480,19 +507,19 @@ function getforecast(city) {
     thisdate = dayjs.unix(parseInt(forecast.list[0].dt)).utc().utcOffset(timeoffset);
     let prevdate = thisdate;
     let firstdate = thisdate;
-    console.log(
-      "TIMESTAMP: ",
-      forecast.list[i].dt,
-      timeoffset,
-      "\n THISDATE ",
-      thisdate.utc(),
-      "\n THISDATEOFFSET ",
-      thisdate.utc().utcOffset(timeoffset),
-      "\n DATE: ",
-      thisdate.date(),
-      "\n UTCDATE: ",
-      thisdate.utc().date()
-    );
+    // console.log(
+    //   "TIMESTAMP: ",
+    //   forecast.list[i].dt,
+    //   timeoffset,
+    //   "\n THISDATE ",
+    //   thisdate.utc(),
+    //   "\n THISDATEOFFSET ",
+    //   thisdate.utc().utcOffset(timeoffset),
+    //   "\n DATE: ",
+    //   thisdate.date(),
+    //   "\n UTCDATE: ",
+    //   thisdate.utc().date()
+    // );
 
     // display all 3-hour forecast on the same day
     while (thisdate.date() === prevdate.date()) {
@@ -562,19 +589,19 @@ function getforecast(city) {
         break;
       } else {
         thisdate = dayjs.unix(parseInt(forecast.list[i].dt)).utcOffset(timeoffset);
-        console.log(
-          "TIMESTAMP: ",
-          forecast.list[i].dt,
-          timeoffset,
-          "\n THISDATE ",
-          thisdate.utc(),
-          "\n THISDATEOFFSET ",
-          thisdate.utc().utcOffset(timeoffset),
-          "\n DATE: ",
-          thisdate.date(),
-          "\n UTCDATE: ",
-          thisdate.utc().date()
-        );
+        // console.log(
+        //   "TIMESTAMP: ",
+        //   forecast.list[i].dt,
+        //   timeoffset,
+        //   "\n THISDATE ",
+        //   thisdate.utc(),
+        //   "\n THISDATEOFFSET ",
+        //   thisdate.utc().utcOffset(timeoffset),
+        //   "\n DATE: ",
+        //   thisdate.date(),
+        //   "\n UTCDATE: ",
+        //   thisdate.utc().date()
+        // );
       }
     }
     prevdate = thisdate;
@@ -583,7 +610,7 @@ function getforecast(city) {
     /* debug
   for (var i = 0; i < forecast.list.length; i++) {
     var x = dayjs.unix(forecast.list[i].dt);
-    console.log(
+    // console.log(
       forecast.list[i].dt_txt,
       " --- ",
       x.format(),
@@ -601,12 +628,12 @@ function getplacelocation(placename) {
 
   var apilink = "https://api.openweathermap.org/geo/1.0/direct?q=" + placename + "&limit=15&appid=" + myapikey;
 
-  console.log("fetching ", apilink);
+  // console.log("fetching ", apilink);
 
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
-        console.log(response);
+        // console.log(response);
         response.json().then(function (data) {
           var cityoptions = document.getElementById("cityoptions");
           cityoptions.replaceChildren();
@@ -638,7 +665,7 @@ function getplacelocation(placename) {
       }
     })
     .catch(function (error) {
-      console.log("Error:", error);
+      // console.log("Error:", error);
     });
 }
 
@@ -666,27 +693,27 @@ function getplacename(position) {
   fetch(apilink)
     .then(function (response) {
       if (response.ok) {
-        console.log(response);
+        // console.log(response);
         response.json().then(function (data) {
-          console.log(data);
+          // console.log(data);
 
           // /*  Uncomment to allow API calls out via googleapi ******
           // if (data.plus_code.compound_code) {
-          //   console.log("We are in " + data.plus_code.compound_code.split(" ")[1]);
+          //   // console.log("We are in " + data.plus_code.compound_code.split(" ")[1]);
           // } else {
-          //   console.log("We're in the middle of nowhere");
+          //   // console.log("We're in the middle of nowhere");
           // }
           // */
           // /* Parse the openweathermap API response
           localename = data[0].name;
           if (data[0].name) {
             localename = data[0].name;
-            console.log("We are in " + localename);
+            // console.log("We are in " + localename);
 
             // set the city search input text
             document.getElementById("citychoice").value = localename; // Show the city in the input text area
           } else {
-            console.log("We're in the middle of nowhere");
+            // console.log("We're in the middle of nowhere");
           }
           return localename;
           // end parse openweathermap API response */
@@ -696,37 +723,37 @@ function getplacename(position) {
       }
     })
     .catch(function (error) {
-      console.log("Error:", error);
+      // console.log("Error:", error);
     });
 
   /********** Use debug googleapi response testdata 
   /* (so we don't have to call the API while developing) 
   let data = JSON.parse(testdata);
-  console.log(data);
-  console.log(data.plus_code);
+  // console.log(data);
+  // console.log(data.plus_code);
   if (data.plus_code.compound_code) {
     localename = data.plus_code.compound_code.split(" ")[1];
-    console.log("We are in " + localename);
+    // console.log("We are in " + localename);
 
     // set the city search input text
     document.getElementById("citychoice").value = localename;
   } else {
-    console.log("We're in the middle of nowhere");
+    // console.log("We're in the middle of nowhere");
   }
   ************ googleapi respnose testdata */
 
   /*********** openweather reverse geocoding response testdata *
   let data = JSON.parse(testowcity);
-  console.log(data);
+  // console.log(data);
   localename = data[0].name;
   if (data[0].name) {
     localename = data[0].name;
-    console.log("We are in " + localename);
+    // console.log("We are in " + localename);
 
     // set the city search input text
     document.getElementById("citychoice").value = localename;
   } else {
-    console.log("We're in the middle of nowhere");
+    // console.log("We're in the middle of nowhere");
   }
   **** /openweather reverse geocoding */
 
@@ -811,7 +838,7 @@ function centermap(placename) {
     citychoice.dataset.longitude +
     "&zoom=8&q=" +
     encodeURIComponent(placename);
-  console.log("Centering map to: ", maplink);
+  // console.log("Centering map to: ", maplink);
   document.getElementById("mainmap").setAttribute("src", maplink);
 }
 
@@ -842,7 +869,7 @@ document.querySelector("#getweather").addEventListener("click", function () {
       return elem.name.toLowerCase() === city.toLowerCase();
     });
     if (index >= 0) {
-      console.log(city, " is found in the history list at ", index);
+      // console.log(city, " is found in the history list at ", index);
       var tempcity = config.dataobj.searchistory[index];
       config.dataobj.searchistory.splice(index, 1); // 2nd parameter means remove one item only
       config.dataobj.searchistory.push(tempcity);
@@ -852,7 +879,7 @@ document.querySelector("#getweather").addEventListener("click", function () {
       config.store_data();
     } else {
       config.dataobj.searchistory.push({ name: city, lat: config.dataobj.latitude, lng: config.dataobj.longitude }); // if not, add the city to the search history
-      console.log("Added city ", city, " to ", config.dataobj.searchistory);
+      // console.log("Added city ", city, " to ", config.dataobj.searchistory);
       displaysearchhistory();
       config.store_data();
     }
@@ -873,7 +900,7 @@ document.getElementById("searchhistory").addEventListener("click", function (eve
     cityinput.value = event.target.textContent;
     cityinput.dataset.latitude = event.target.dataset.lat;
     cityinput.dataset.longitude = event.target.dataset.lng;
-    console.log("clicked on searchhistory: ", event.target);
+    // console.log("clicked on searchhistory: ", event.target);
     config.dataobj.latitude = event.target.dataset.lat;
     config.dataobj.longitude = event.target.dataset.lng;
   }
@@ -882,7 +909,7 @@ document.getElementById("searchhistory").addEventListener("click", function (eve
 // City choice: Click on search city, which should pop out cityoptions below
 document.getElementById("lookupcity").addEventListener("click", function (event) {
   event.preventDefault();
-  console.log("click on lookupcity button: ", document.getElementById("citychoice").value.trim());
+  // console.log("click on lookupcity button: ", document.getElementById("citychoice").value.trim());
   if (document.getElementById("citychoicedetails").hasAttribute("open")) {
     document.getElementById("citychoicedetails").removeAttribute("open");
   } else {
@@ -898,19 +925,19 @@ document.getElementById("lookupcity").addEventListener("click", function (event)
 // City choice: Click selecting city options after clicking lookupcity above
 document.getElementById("cityoptions").addEventListener("click", function (event) {
   event.preventDefault();
-  console.log(
-    "clicked on cityoptions button: ",
-    event.target.textContent,
-    event.target.dataset.longitude,
-    event.target.dataset.latitude
-  );
+  // console.log(
+  //   "clicked on cityoptions button: ",
+  //   event.target.textContent,
+  //   event.target.dataset.longitude,
+  //   event.target.dataset.latitude
+  // );
   var citychoice = document.getElementById("citychoice");
   citychoice.value = event.target.textContent;
   citychoice.dataset.latitude = event.target.dataset.latitude;
   citychoice.dataset.longitude = event.target.dataset.longitude;
   config.dataobj.latitude = event.target.dataset.latitude;
   config.dataobj.longitude = event.target.dataset.longitude;
-  console.log("config ", config.dataobj);
+  // console.log("config ", config.dataobj);
   document.getElementById("citychoicedetails").removeAttribute("open");
 });
 
@@ -919,9 +946,9 @@ function displayunitconfig() {
   let unitselector = document.getElementsByClassName("unitselector");
   for (j = 0; j < unitselector.length; j++) {
     unitselector[j].firstElementChild.textContent = "Units: " + config.dataobj.units;
-    console.log(unitselector[j].getAttribute("open"));
+    // console.log(unitselector[j].getAttribute("open"));
     unitselector[j].removeAttribute("open");
-    console.log(unitselector[j].getAttribute("open"));
+    // console.log(unitselector[j].getAttribute("open"));
   }
 }
 
@@ -929,7 +956,7 @@ function displayunitconfig() {
 var menus = document.getElementsByClassName("menuselection-units");
 for (var i = 0; i < menus.length; i++) {
   menus[i].addEventListener("click", function (event) {
-    console.log("tag: ", event.target.tagName);
+    // console.log("tag: ", event.target.tagName);
     if (event.target.tagName === "A") {
       config.dataobj.units = event.target.dataset.units;
       displayunitconfig();
@@ -940,12 +967,12 @@ for (var i = 0; i < menus.length; i++) {
 
 // Clear history and save it to localstorage
 function clearhistory(event) {
-  console.log("clear history clicked");
+  // console.log("clear history clicked");
   if (confirm("Clear the City Search history?")) {
     config.dataobj.searchistory = [];
     config.store_data();
     displaysearchhistory();
-    console.log("key cleared");
+    // console.log("key cleared");
   }
 }
 
@@ -959,12 +986,10 @@ document.getElementById("todayscard").addEventListener("click", function (event)
   // console.log(event, " --- ", event.currentTarget);
   document.getElementById("dayforecast").classList.toggle("w-0");
   document.getElementById("dayforecast").classList.toggle("h-0");
-  console.log("toggle ", document.getElementById("dayforecast").classList);
+  // console.log("toggle ", document.getElementById("dayforecast").classList);
 });
 
-/* example calls
-1.2985181
-103.8332306
+/* example api calls
 
 Google API reverse geocoding
 https://maps.googleapis.com/maps/api/elevation/json?locations=1.2985181,103.8332306&key={api_key}

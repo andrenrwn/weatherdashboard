@@ -20,7 +20,7 @@
         <div class="drawer-content">
           <!-- Page content here -->
 
-          <!-- daisyui navbar -->
+          <!-- daisyui navbar as a drawer -->
           <div class="flex-none absolute top-0 left-0 m-2">
             <label for="my-drawer" class="btn btn-square btn-ghost drawer-button">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -36,7 +36,22 @@
         </div>
         <div class="drawer-side">
           <label for="my-drawer" class="drawer-overlay"></label>
-          <!-- Drawer content here -->
+
+          <!-- hidden modal dialog to display information about the background -->
+          <dialog id="background_modal" class="modal">
+            <div class="modal-box">
+              <h3 class="font-bold text-lg" id="backgroundheading"></h3>
+              <span class="py-4" id="backgroundinfo"></span>
+              <div class="modal-action">
+                <form method="dialog">
+                  <!-- if there is a button in form, it will close the modal -->
+                  <button class="btn">Ok</button>
+                </form>
+              </div>
+            </div>
+          </dialog>
+
+          <!-- Drawer menu content here -->
           <div class="navbar bg-gradient-to-b from-white to-transparent w-[100%-5px]">
             <div class="navbar-start">
               <div class="dropdown">
@@ -51,7 +66,7 @@
                 </div>
                 <ul tabindex="0"
                   class="menu menu-sm dropdown-content mt-3 z-[-10] p-2 shadow bg-base-100 rounded-box w-52">
-                  <li><a>Background</a></li>
+                  <li><a><button onclick="background_modal.showModal()">Background</button></a></li>
                   <li>
                     <div class="unitselector"><a>Units</a></div>
                     <ul class="p-2 menuselection-units">
@@ -66,7 +81,7 @@
             </div>
             <div class="navbar-start hidden lg:flex">
               <ul class="menu menu-horizontal px-1 items-center">
-                <li><a>Background</a></li>
+                <li><a><button onclick="background_modal.showModal()">Background</button></a>
                 <li tabindex="0">
                   <details class="unitselector">
                     <summary>Units</summary>
@@ -78,14 +93,16 @@
                   </details>
                 </li>
                 <li><a id="clearhistory2">Clear History</a></li>
+                <!-- future option to use local timezone to render city time (TBD)
                 <li>
                   <div class="form-control">
                     <label class="label cursor-pointer">
                       <span class="label-text">City TZ&nbsp;</span>
-                      <input id="usecitytimezone" type="checkbox" class="toggle" checked />
+                      <input id="useremotetimezone" type="checkbox" class="toggle" checked />
                     </label>
                   </div>
                 </li>
+                -->
               </ul>
             </div>
             <div class="navbar-end">
@@ -97,7 +114,7 @@
               </label>
             </div>
           </div>
-          <!-- /Sidebar content end -->
+          <!-- /Drawer content end -->
           </ul>
         </div>
       </div>
@@ -247,12 +264,12 @@
                     <span id="todaysdate"></span>
                   </p>
                   <p class="text-lg">
-                    <span id="todaysweatherdescription" class="capitalize">forecast description</span>
-                  <p id="todaysweatherdata" class="text-lg">Temperature, Humidity</p>
+                    <span id="todaysweatherdescription" class="capitalize"></span> <!-- forecast description -->
+                  <p id="todaysweatherdata" class="text-lg"></p> <!-- Temperature, Humidity -->
                   <div class="flex flex-row text-lg">
                     <span class="arrowcontainer flex"><span id="winddirection"
                         class="text-3xl w-fit h-fit font-bold">⇧</span></span>
-                    <span id="todaysweatherspeed"> wind direction & speed</span>
+                    <span id="todaysweatherspeed"> </span> <!-- wind direction & speed -->
                   </div>
                   </p>
                 </div>
@@ -266,7 +283,7 @@
             <!-- today's weather cards -->
             <section id="todaysweather" class="row flex flex-row gap-1 justify-end transition-all">
 
-              <!--
+              <!-- weather card example
               <div class="card flex bg-black shadow-xl bg-opacity-80 transition-all hover:bg-opacity-50 transition-all">
                 <figure class="px-1 pt-1">
                   <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="day" class="rounded-xl" />
@@ -303,64 +320,7 @@
         <div id="fivedayforecast"
           class="flex w-full max-w-full overflow-x-auto gap-1 my-1 overscroll-auto hover:overscroll-contain">
           <!-- weather card days -->
-          <!--
-          <div class="card bg-base-100 shadow-xl image-full">
-            <figure>
-              <img src="https://placekitten.com/300/200" alt="weather" />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">14 Sep<br />12 am</h2>
-              <p>
-                <span>☀️</span><br />
-                🌡 65° C<br />
-                🌬 20 kph<br />
-                🌢 65%
-              </p>
-            </div>
-          </div>
-
-          <div class="card bg-base-100 shadow-xl image-full">
-            <figure>
-              <img src="https://placekitten.com/300/200" alt="weather" />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">15 Sep<br />12 am</h2>
-              <p>
-                <span>☀️</span><br />
-                🌡 65° C<br />
-                🌬 20 kph<br />
-                🌢 65%
-              </p>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-xl image-full">
-            <figure>
-              <img src="https://placekitten.com/300/200" alt="weather" />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">16 Sep<br />12 am</h2>
-              <p>
-                <span>☀️</span><br />
-                🌡 65° C<br />
-                🌬 20 kph<br />
-                🌢 65%
-              </p>
-            </div>
-          </div>
-          <div class="card bg-base-100 shadow-xl image-full">
-            <figure>
-              <img src="https://placekitten.com/300/200" alt="weather" />
-            </figure>
-            <div class="card-body">
-              <h2 class="card-title">17 Sep<br />12 am</h2>
-              <p>
-                <span>☀️</span><br />
-                🌡 65° C<br />
-                🌬 20 kph<br />
-                🌢 65%
-              </p>
-            </div>
-          </div>
+          <!-- weather card example
           <div class="card bg-base-100 shadow-xl image-full">
             <figure>
               <img src="https://placekitten.com/300/200" alt="weather" />
@@ -387,10 +347,6 @@
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
 <!--
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
-<script type="text/javascript" src="testing/forecast.json"></script>
-<script type="text/javascript" src="testing/openweather_city.json"></script>
-<script type="text/javascript" src="testing/testdata.json"></script>
-<script type="text/javascript" src="testing/unsplash_random.json"></script>
 -->
 <script src="./assets/config.js"></script>
 <script src="./assets/script.js"></script>
