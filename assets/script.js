@@ -627,7 +627,7 @@ function getplacelocation(placename) {
   // Example of openweathermap geocoding api call:
   // https://api.openweathermap.org/geo/1.0/direct?q=paris,Texas,US&limit=5&appid=2baf085ed1bbea0d1b7d521e3687a9b9
 
-  var apilink = "https://api.openweathermap.org/geo/1.0/direct?q=" + placename + "&limit=15&appid=" + myapikey;
+  var apilink = "https://api.openweathermap.org/geo/1.0/direct?q=" + placename + "&limit=15&appid=" + myapikeys.openweather;
 
   // console.log("fetching ", apilink);
 
